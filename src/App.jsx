@@ -12,10 +12,12 @@ function Hero3D() {
           <MeshDistortMaterial
             color="#6366f1"
             attach="material"
-            distort={0.6} // High distortion for liquid effect
-            speed={2} // Fast movement
-            roughness={0.2}
-            metalness={0.9} // Shiny metal look
+            distort={0.6}
+            speed={2}
+            roughness={0.4} // Increased roughness to catch more light
+            metalness={0.2} // Reduced metalness so it's not black
+            emissive="#4338ca" // Added glow
+            emissiveIntensity={0.3}
             bumpScale={0.01}
           />
         </Sphere>
