@@ -28,7 +28,7 @@ function Hero3D() {
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={2} color="#ffffff" />
       <pointLight position={[-10, -10, -5]} intensity={5} color="#ec4899" /> {/* Pink Rim Light */}
-      <Environment preset="city" />
+      <spotLight position={[5, 10, 5]} angle={0.5} penumbra={1} intensity={2} castShadow />
     </Suspense>
   );
 }
