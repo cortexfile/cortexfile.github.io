@@ -1,50 +1,16 @@
-# CortexFile
+# React + Vite
 
-🧠 **Smart Software Solutions**
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-We build intelligent tools that simplify your digital life.
+Currently, two official plugins are available:
 
-## 🚀 Our Products
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-### 📧 Email Attachment Organizer
-Automatically organize and manage your email attachments by type and date.
+## React Compiler
 
-[![Available](https://img.shields.io/badge/Status-Available-success)](https://github.com/cortexfile/EmailAttachmentOrganizer)
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-**Features:**
-- 🔄 Automatic organization by type
-- 📅 Smart date-based folders
-- 🌍 Multi-language (AR, EN, FR, DE, ES)
-- 🎨 Modern, beautiful interface
+## Expanding the ESLint configuration
 
-[📥 Download](https://github.com/cortexfile/EmailAttachmentOrganizer/releases) | [📖 Documentation](https://github.com/cortexfile/EmailAttachmentOrganizer)
-
----
-
-### 📁 Smart File Manager
-*Coming Soon*
-
-### 🔒 SecureVault
-*Coming Soon*
-
----
-
-## 🌟 Why CortexFile?
-
-| Feature | Description |
-|---------|-------------|
-| 🚀 Fast | Optimized performance |
-| 🌍 Multi-Language | AR, EN, FR, DE, ES |
-| 🎨 Modern | Beautiful UI design |
-| 💪 Reliable | Quality & stability |
-
----
-
-## 📬 Contact
-
-- 📧 Email: [cortexfile.fm@gmail.com](mailto:cortexfile.fm@gmail.com)
-- 🐙 GitHub: [github.com/cortexfile](https://github.com/cortexfile)
-
----
-
-© 2026 CortexFile. All rights reserved.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
