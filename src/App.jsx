@@ -8,7 +8,7 @@ function App() {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
-      background: '#1a1a1a',
+      background: '#2e1065', // Dark Purple to confirm update
       color: '#fff',
       flexDirection: 'column'
     }}>
