@@ -11,6 +11,7 @@ export interface Product {
   features: string[];
   version: string;
   downloadSize: string;
+  fileUrl?: string;
 }
 
 export interface CartItem extends Product {

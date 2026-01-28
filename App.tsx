@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Store from './src/Store';
+import ProductDetails from './src/ProductDetails';
 import Login from './src/Login';
 import AdminDashboard from './src/AdminDashboard';
 
@@ -9,6 +10,7 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<Store />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>

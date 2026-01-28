@@ -62,7 +62,10 @@ const Navbar = ({ cartCount, onOpenCart, onOpenMobileMenu }: any) => {
 };
 
 // 2. Product Card
+import { useNavigate } from 'react-router-dom';
+
 const ProductCard = ({ product, onAddToCart }: { product: Product; onAddToCart: (p: Product) => void }) => {
+  const navigate = useNavigate();
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -80,7 +83,7 @@ const ProductCard = ({ product, onAddToCart }: { product: Product; onAddToCart: 
           <Badge>{product.category}</Badge>
         </div>
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-          <Button size="sm" variant="outline">View Details</Button>
+          <Button size="sm" variant="outline" onClick={() => navigate(`/product/${product.id}`)}>View Details</Button>
         </div>
       </div>
 
@@ -356,7 +359,11 @@ const Store = () => {
   const fetchProducts = async () => {
     const { data, error } = await supabase.from('products').select('*');
     if (!error && data) {
-      setProducts(data);
+      const mappedData = data.map(p => ({
+        ...p,
+        fileUrl: p.file_url
+      }));
+      setProducts(mappedData);
     } else {
       // Fallback to mock if DB is empty or error (optional, but good for demo)
       setProducts(MOCK_PRODUCTS);

@@ -9,6 +9,8 @@ const AdminDashboard = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [isAdding, setIsAdding] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const navigate = useNavigate();
 
     // New Product Form State
@@ -21,7 +23,8 @@ const AdminDashboard = () => {
         rating: 5.0,
         reviews: 0,
         image: 'https://picsum.photos/400/400',
-        version: '1.0.0'
+        version: '1.0.0',
+        fileUrl: ''
     });
 
     useEffect(() => {
@@ -39,7 +42,12 @@ const AdminDashboard = () => {
         if (error) {
             console.error("Error fetching products:", error);
         } else {
-            setProducts(data || []);
+            // Map DB snake_case to frontend camelCase
+            const mappedProducts = (data || []).map(p => ({
+                ...p,
+                fileUrl: p.file_url
+            }));
+            setProducts(mappedProducts);
         }
         setLoading(false);
     };
@@ -49,10 +57,81 @@ const AdminDashboard = () => {
         navigate('/login');
     };
 
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        try {
+            setUploading(true);
+            if (!event.target.files || event.target.files.length === 0) {
+                throw new Error('You must select an image to upload.');
+            }
+
+            const file = event.target.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('product-files')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            const { data } = supabase.storage.from('product-files').getPublicUrl(filePath);
+
+            setNewProduct({ ...newProduct, fileUrl: data.publicUrl });
+            alert('File uploaded successfully!');
+        } catch (error: any) {
+            alert('Error uploading file: ' + error.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        try {
+            setUploadingImage(true);
+            if (!event.target.files || event.target.files.length === 0) {
+                return;
+            }
+
+            const file = event.target.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `img_${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('product-files')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            const { data } = supabase.storage.from('product-files').getPublicUrl(filePath);
+
+            setNewProduct({ ...newProduct, image: data.publicUrl });
+        } catch (error: any) {
+            alert('Error uploading image: ' + error.message);
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
     const handleAddProduct = async () => {
         if (!newProduct.name || !newProduct.description) return;
 
-        const { error } = await supabase.from('products').insert([newProduct]);
+        // Prepare data for DB (convert camelCase to snake_case)
+        const dbProduct = {
+            ...newProduct,
+            file_url: newProduct.fileUrl
+        };
+        // Remove the camelCase version so Supabase doesn't complain
+        delete (dbProduct as any).fileUrl;
+
+        const { error } = await supabase.from('products').insert([dbProduct]);
         if (error) {
             alert('Error adding product: ' + error.message);
         } else {
@@ -68,7 +147,8 @@ const AdminDashboard = () => {
                 rating: 5.0,
                 reviews: 0,
                 image: 'https://picsum.photos/400/400',
-                version: '1.0.0'
+                version: '1.0.0',
+                fileUrl: ''
             });
         }
     };
@@ -142,9 +222,57 @@ const AdminDashboard = () => {
                                         value={newProduct.description} onChange={e => setNewProduct({ ...newProduct, description: e.target.value })} />
                                 </div>
                                 <div className="col-span-2">
-                                    <label className="block text-sm text-gray-400 mb-1">Image URL (Optional)</label>
-                                    <input type="text" className="w-full bg-black/30 border border-white/10 rounded-lg p-3"
-                                        value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} />
+                                    <label className="block text-sm text-gray-400 mb-1">Product Image</label>
+                                    <div className="flex gap-2 mb-2">
+                                        <input type="text" placeholder="Or paste Image URL" className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-sm"
+                                            value={newProduct.image} onChange={e => setNewProduct({ ...newProduct, image: e.target.value })} />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <label className="cursor-pointer bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors">
+                                            <ImageIcon size={16} />
+                                            {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleImageUpload}
+                                                disabled={uploadingImage}
+                                            />
+                                        </label>
+                                        {newProduct.image && newProduct.image.includes('supabase') && <span className="text-green-400 text-xs">✓ Image Uploaded</span>}
+                                    </div>
+                                    {newProduct.image && (
+                                        <img src={newProduct.image} alt="Preview" className="w-20 h-20 mt-2 rounded-md object-cover border border-white/10" />
+                                    )}
+                                </div>
+                                <div className="col-span-2 border-t border-white/10 pt-4 mt-2">
+                                    <label className="block text-sm text-cyber-neon mb-2 font-bold">Upload Digital Product (.exe / .zip)</label>
+                                    <div className="flex gap-2 items-center">
+                                        <input
+                                            type="file"
+                                            accept=".exe,.zip,.rar,.msi"
+                                            onChange={handleFileUpload}
+                                            disabled={uploading}
+                                            className="block w-full text-sm text-gray-400
+                                            file:mr-4 file:py-2 file:px-4
+                                            file:rounded-full file:border-0
+                                            file:text-sm file:font-semibold
+                                            file:bg-cyber-primary file:text-white
+                                            hover:file:bg-cyber-primary/80"
+                                        />
+                                        {uploading && <span className="text-sm text-cyber-primary animate-pulse">Uploading...</span>}
+                                        {newProduct.fileUrl && <span className="text-sm text-green-400">✓ Ready</span>}
+                                    </div>
+                                    <div className="mt-2 text-xs">
+                                        <p className="text-gray-500 mb-1">Or paste external link (Google Drive, etc):</p>
+                                        <input
+                                            type="text"
+                                            placeholder="https://example.com/file.zip"
+                                            className="w-full bg-black/30 border border-white/10 rounded-lg p-2 text-cyber-neon"
+                                            value={newProduct.fileUrl || ''}
+                                            onChange={e => setNewProduct({ ...newProduct, fileUrl: e.target.value })}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
