@@ -57,8 +57,8 @@ export const Button = ({
   );
 };
 
-export const Badge = ({ children, color = 'bg-cyber-primary' }: { children: any; color?: string }) => (
-  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color} bg-opacity-20 text-white border border-white/10`}>
+export const Badge = ({ children, color = 'bg-cyber-primary', className = '' }: { children: any; color?: string; className?: string }) => (
+  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color} bg-opacity-20 text-white border border-white/10 ${className}`}>
     {children}
   </span>
 );
