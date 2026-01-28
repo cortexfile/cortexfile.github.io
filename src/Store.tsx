@@ -192,7 +192,7 @@ const Hero = () => {
 
       <div className="container mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
         <motion.div style={{ y: y1 }} className="space-y-6">
-          <Badge color="bg-cyber-neon text-cyber-black font-bold">v3.0 RELEASED</Badge>
+
           <h1 className="text-5xl md:text-7xl font-extrabold leading-tight tracking-tight">
             Execute Your <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon via-white to-cyber-primary animate-pulse-slow">
