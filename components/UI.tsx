@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 interface ButtonProps {
   children?: any;
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   className?: string;
@@ -12,21 +12,22 @@ interface ButtonProps {
   [key: string]: any;
 }
 
-export const Button = ({ 
-  children, 
-  variant = 'primary', 
-  size = 'md', 
-  isLoading, 
-  className = '', 
-  ...props 
+export const Button = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  isLoading,
+  className = '',
+  ...props
 }: ButtonProps) => {
   const baseStyles = "relative inline-flex items-center justify-center font-bold tracking-wide transition-all duration-300 rounded-lg overflow-hidden group";
-  
+
   const variants = {
     primary: "bg-gradient-to-r from-cyber-primary to-cyber-accent text-white shadow-[0_0_20px_rgba(99,102,241,0.5)] hover:shadow-[0_0_30px_rgba(217,70,239,0.6)] hover:scale-[1.02]",
     secondary: "bg-cyber-card text-white border border-white/10 hover:bg-white/5",
     outline: "bg-transparent border border-cyber-primary/50 text-cyber-primary hover:bg-cyber-primary/10",
-    danger: "bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30"
+    danger: "bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30",
+    ghost: "bg-transparent text-gray-400 hover:text-white hover:bg-white/5"
   };
 
   const sizes = {
@@ -64,7 +65,7 @@ export const Badge = ({ children, color = 'bg-cyber-primary' }: { children: any;
 
 export const SectionTitle = ({ title, subtitle }: { title: string; subtitle?: string }) => (
   <div className="text-center mb-16">
-    <motion.h2 
+    <motion.h2
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -73,7 +74,7 @@ export const SectionTitle = ({ title, subtitle }: { title: string; subtitle?: st
       {title}
     </motion.h2>
     {subtitle && (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
