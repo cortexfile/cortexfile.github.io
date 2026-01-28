@@ -200,7 +200,7 @@ const Hero = () => {
             </span>
           </h1>
           <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
-            The world's most advanced marketplace for high-performance EXE tools, AI utilities, and developer assets. Optimized for the future.
+            The world's most advanced marketplace for high-performance EXE tools, System utilities, and developer assets. Optimized for the future.
           </p>
           <div className="flex gap-4">
             <Button size="lg" onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}>
@@ -215,7 +215,7 @@ const Hero = () => {
             {[
               { icon: Zap, label: "Instant Delivery" },
               { icon: Shield, label: "Secure Guard" },
-              { icon: Cpu, label: "AI Powered" }
+              { icon: Cpu, label: "High Performance" }
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-2 text-gray-400">
                 <Icon size={20} className="text-cyber-primary" />
@@ -521,7 +521,7 @@ const Store = () => {
           <div className="bg-gradient-to-r from-cyber-primary to-cyber-accent rounded-3xl p-12 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-black/20" />
             <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-              <h2 className="text-3xl font-bold">Join the Neural Network</h2>
+              <h2 className="text-3xl font-bold">Join the Developer Network</h2>
               <p className="text-white/80">Get exclusive access to beta releases and discount codes dropped directly to your inbox.</p>
               <div className="flex gap-4 max-w-md mx-auto">
                 <input type="email" placeholder="enter_email_address.exe" className="flex-1 px-4 py-3 rounded-lg bg-black/30 border border-white/20 text-white placeholder-white/50 focus:outline-none" />
