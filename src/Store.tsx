@@ -78,7 +78,7 @@ const ProductCard = ({ product, onAddToCart }: { product: Product; onAddToCart: 
 
       {/* Image / Preview */}
       <div className="relative h-48 rounded-xl overflow-hidden mb-4 bg-cyber-dark">
-        <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+        <img src={product.image} alt={product.name} className="w-full h-full object-contain p-2 transition-transform duration-700 group-hover:scale-110" />
         <div className="absolute top-2 right-2">
           <Badge>{product.category}</Badge>
         </div>
