@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Menu, User, Search } from 'lucide-react';
+import { ShoppingCart, Menu, User, Search, Globe } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Link, useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
+import { useLanguage } from './LanguageContext';
 
 interface NavbarProps {
     cartCount?: number;
@@ -14,6 +15,7 @@ const Navbar = ({ cartCount = 0, onOpenCart, onOpenMobileMenu }: NavbarProps) =>
     const [scrolled, setScrolled] = useState(false);
     const [user, setUser] = useState<any>(null);
     const navigate = useNavigate();
+    const { t, language, setLanguage, dir } = useLanguage();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -35,8 +37,12 @@ const Navbar = ({ cartCount = 0, onOpenCart, onOpenMobileMenu }: NavbarProps) =>
         setUser(session?.user ?? null);
     };
 
+    const toggleLang = () => {
+        setLanguage(language === 'en' ? 'ar' : 'en');
+    };
+
     return (
-        <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-cyber-black/80 backdrop-blur-xl border-b border-white/5 py-4' : 'bg-transparent py-6'}`}>
+        <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-cyber-black/80 backdrop-blur-xl border-b border-white/5 py-4' : 'bg-transparent py-6'}`} dir={dir}>
             <div className="container mx-auto px-6 flex justify-between items-center">
                 <div className="flex items-center gap-3 flex-shrink-0">
                     <div className="w-10 h-10 bg-gradient-to-br from-cyber-primary to-cyber-accent rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-[0_0_15px_rgba(99,102,241,0.4)] flex-shrink-0">
@@ -48,25 +54,24 @@ const Navbar = ({ cartCount = 0, onOpenCart, onOpenMobileMenu }: NavbarProps) =>
                 </div>
 
                 <div className="hidden md:flex items-center gap-8">
-                    {['Products', 'Features', 'Testimonials'].map((item) => (
-                        <a key={item} href={`/#${item.toLowerCase()}`} className="text-gray-400 hover:text-white transition-colors text-sm font-medium uppercase tracking-widest hover:neon-text">
-                            {item}
-                        </a>
-                    ))}
+                    <Link to="/#products" className="text-gray-400 hover:text-white transition-colors text-sm font-medium uppercase tracking-widest hover:neon-text">{t('nav.products')}</Link>
+                    <Link to="/#features" className="text-gray-400 hover:text-white transition-colors text-sm font-medium uppercase tracking-widest hover:neon-text">{t('nav.features')}</Link>
+                    <Link to="/#testimonials" className="text-gray-400 hover:text-white transition-colors text-sm font-medium uppercase tracking-widest hover:neon-text">{t('nav.testimonials')}</Link>
                     <Link to="/blog" className="text-gray-400 hover:text-white transition-colors text-sm font-medium uppercase tracking-widest hover:neon-text">
-                        Blog
+                        {t('nav.blog')}
                     </Link>
                 </div>
 
                 <div className="flex-1 max-w-md mx-8 hidden md:block">
                     <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <div className={`absolute inset-y-0 ${dir === 'rtl' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
                             <Search className="h-5 w-5 text-gray-500 group-focus-within:text-cyber-primary transition-colors" />
                         </div>
                         <input
                             type="text"
-                            placeholder="Search products..."
-                            className="block w-full pl-10 pr-3 py-2 border border-white/10 rounded-lg leading-5 bg-black/50 text-gray-300 placeholder-gray-500 focus:outline-none focus:bg-black/80 focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary sm:text-sm transition-all duration-300"
+                            placeholder={t('common.searchPlaceholder')}
+                            className={`block w-full ${dir === 'rtl' ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border border-white/10 rounded-lg leading-5 bg-black/50 text-gray-300 placeholder-gray-500 focus:outline-none focus:bg-black/80 focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary sm:text-sm transition-all duration-300`}
+                            dir={dir}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     window.location.href = `/?search=${e.currentTarget.value}`;
@@ -77,14 +82,19 @@ const Navbar = ({ cartCount = 0, onOpenCart, onOpenMobileMenu }: NavbarProps) =>
                 </div>
 
                 <div className="flex items-center gap-4">
+                    <button onClick={toggleLang} className="p-2 text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                        <Globe size={20} />
+                        <span className="text-xs font-bold uppercase">{language === 'en' ? 'AR' : 'EN'}</span>
+                    </button>
+
                     <ThemeToggle />
                     {user ? (
-                        <Link to="/user/profile" className="p-2 text-gray-400 hover:text-white transition-colors" title="My Account">
+                        <Link to="/user/profile" className="p-2 text-gray-400 hover:text-white transition-colors" title={t('nav.profile')}>
                             <User size={24} />
                         </Link>
                     ) : (
                         <Link to="/login" className="text-sm font-bold text-cyber-primary hover:text-cyber-neon tracking-widest uppercase">
-                            Login
+                            {t('nav.login')}
                         </Link>
                     )}
 
@@ -92,7 +102,7 @@ const Navbar = ({ cartCount = 0, onOpenCart, onOpenMobileMenu }: NavbarProps) =>
                         <button onClick={onOpenCart} className="relative p-2 text-gray-400 hover:text-white transition-colors">
                             <ShoppingCart size={24} />
                             {cartCount > 0 && (
-                                <span className="absolute top-0 right-0 w-5 h-5 bg-cyber-accent text-white text-xs font-bold rounded-full flex items-center justify-center animate-bounce">
+                                <span className={`absolute top-0 ${dir === 'rtl' ? 'left-0' : 'right-0'} w-5 h-5 bg-cyber-accent text-white text-xs font-bold rounded-full flex items-center justify-center animate-bounce`}>
                                     {cartCount}
                                 </span>
                             )}

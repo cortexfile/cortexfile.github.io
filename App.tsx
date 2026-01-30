@@ -8,6 +8,8 @@ import ResetPassword from './src/ResetPassword';
 import Blog from './src/Blog';
 import BlogPost from './src/BlogPost';
 import Checkout from './src/Checkout';
+import StripeCheckout from './src/StripeCheckout';
+import Contact from './src/Contact';
 import UserLayout from './src/user/UserLayout';
 import ProfilePage from './src/user/ProfilePage';
 import UserOrdersPage from './src/user/UserOrdersPage';
@@ -16,6 +18,7 @@ import WishlistPage from './src/user/WishlistPage';
 import ProtectedRoute from './src/components/ProtectedRoute';
 import { ToastProvider } from './src/components/Toast';
 import { ThemeProvider } from './src/components/ThemeContext';
+import { LanguageProvider } from './src/components/LanguageContext';
 
 // Lazy load Admin components
 const AdminLayout = lazy(() => import('./src/admin/AdminLayout'));
@@ -40,47 +43,50 @@ const PageLoader = () => (
 
 const App = () => {
   return (
-    <ThemeProvider>
-      <ToastProvider>
-        <Router>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Store />} />
-              <Route path="/product/:id" element={<ProductDetails />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/blog/:slug" element={<BlogPost />} />
-              <Route path="/checkout" element={<Checkout />} />
+    <LanguageProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <Router>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Store />} />
+                <Route path="/product/:id" element={<ProductDetails />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/checkout" element={<StripeCheckout />} />
+                <Route path="/contact" element={<Contact />} />
 
-              {/* User Routes - Protected by default via UserLayout logic or Auth Guard if needed */}
-              <Route path="/user" element={<UserLayout />}>
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="orders" element={<UserOrdersPage />} />
-                <Route path="wishlist" element={<WishlistPage />} />
-              </Route>
-
-              {/* Admin Routes */}
-              <Route element={<ProtectedRoute />}>
-                <Route path="/admin" element={<AdminLayout />}>
-                  {/* ... existing admin routes */}
-                  <Route index element={<Dashboard />} />
-                  <Route path="orders" element={<OrdersPage />} />
-                  <Route path="products" element={<ProductsPage />} />
-                  <Route path="blog" element={<BlogPage />} />
-                  <Route path="appearance" element={<AppearancePage />} />
-                  <Route path="testimonials" element={<TestimonialsPage />} />
-                  <Route path="features" element={<FeaturesPage />} />
-                  <Route path="media" element={<MediaPage />} />
+                {/* User Routes - Protected by default via UserLayout logic or Auth Guard if needed */}
+                <Route path="/user" element={<UserLayout />}>
+                  <Route path="profile" element={<ProfilePage />} />
+                  <Route path="orders" element={<UserOrdersPage />} />
+                  <Route path="wishlist" element={<WishlistPage />} />
                 </Route>
-              </Route>
-            </Routes>
-          </Suspense>
-        </Router>
-      </ToastProvider>
-    </ThemeProvider>
+
+                {/* Admin Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/admin" element={<AdminLayout />}>
+                    {/* ... existing admin routes */}
+                    <Route index element={<Dashboard />} />
+                    <Route path="orders" element={<OrdersPage />} />
+                    <Route path="products" element={<ProductsPage />} />
+                    <Route path="blog" element={<BlogPage />} />
+                    <Route path="appearance" element={<AppearancePage />} />
+                    <Route path="testimonials" element={<TestimonialsPage />} />
+                    <Route path="features" element={<FeaturesPage />} />
+                    <Route path="media" element={<MediaPage />} />
+                  </Route>
+                </Route>
+              </Routes>
+            </Suspense>
+          </Router>
+        </ToastProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 };
 
