@@ -14,56 +14,11 @@ import { Button, Badge, SectionTitle } from '../components/UI';
 // --- Sub-Components (Defined here for file constraint) ---
 
 import Navbar from './components/Navbar';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from './components/Toast';
 
 // 2. Product Card
-import { useNavigate } from 'react-router-dom';
-
-const ProductCard = ({ product, onAddToCart }: { product: Product; onAddToCart: (p: Product) => void }) => {
-  const navigate = useNavigate();
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      whileHover={{ y: -10 }}
-      className="group relative glass-panel rounded-2xl p-4 overflow-hidden"
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-cyber-primary/5 to-cyber-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-      {/* Image / Preview */}
-      <div className="relative h-48 rounded-xl overflow-hidden mb-4 bg-cyber-dark">
-        <img src={product.image} alt={product.name} className="w-full h-full object-contain p-2 transition-transform duration-700 group-hover:scale-110" />
-        <div className="absolute top-2 right-2">
-          <Badge>{product.category}</Badge>
-        </div>
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-          <Button size="sm" variant="outline" onClick={() => navigate(`/product/${product.id}`)}>View Details</Button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-bold text-white group-hover:text-cyber-neon transition-colors truncate pr-2">{product.name}</h3>
-          <div className="flex items-center text-yellow-400 text-xs">
-            <Star size={12} fill="currentColor" />
-            <span className="ml-1 font-mono">{product.rating}</span>
-          </div>
-        </div>
-        <p className="text-gray-400 text-sm mb-4 line-clamp-2 h-10">{product.shortDescription}</p>
-
-        <div className="flex items-center justify-between mt-auto">
-          <span className="text-xl font-mono font-bold text-white">
-            ${product.price === 0 ? 'FREE' : product.price}
-          </span>
-          <Button size="sm" onClick={() => onAddToCart(product)}>
-            Add to Cart
-          </Button>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+import ProductCard from './components/ProductCard';
 
 // 3. Cart Drawer
 const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemove, onCheckout }: any) => {
@@ -317,6 +272,7 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onComplete }: any) => {
 
 const Store = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -367,7 +323,7 @@ const Store = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(new URLSearchParams(window.location.search).get('search') || '');
 
   // Cart Logic
   const addToCart = (product: Product) => {
@@ -379,6 +335,7 @@ const Store = () => {
       return [...prev, { ...product, quantity: 1 }];
     });
     setIsCartOpen(true);
+    showToast(`Added ${product.name} to cart`, 'success');
   };
 
   const removeFromCart = (id: string) => {
@@ -421,7 +378,10 @@ const Store = () => {
 
         {/* Featured / Products Section */}
         <section id="products" className="container mx-auto px-6">
-          <SectionTitle title="Digital Arsenal" subtitle="Premium Tools" />
+          <SectionTitle
+            title={searchQuery ? `Results: "${searchQuery}"` : "Digital Arsenal"}
+            subtitle={searchQuery ? "Found products matching your search" : "Premium Tools"}
+          />
 
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
             <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Menu, User } from 'lucide-react';
+import { ShoppingCart, Menu, User, Search } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { Link, useNavigate } from 'react-router-dom';
+import ThemeToggle from './ThemeToggle';
 
 interface NavbarProps {
     cartCount?: number;
@@ -57,7 +58,26 @@ const Navbar = ({ cartCount = 0, onOpenCart, onOpenMobileMenu }: NavbarProps) =>
                     </Link>
                 </div>
 
+                <div className="flex-1 max-w-md mx-8 hidden md:block">
+                    <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search className="h-5 w-5 text-gray-500 group-focus-within:text-cyber-primary transition-colors" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search products..."
+                            className="block w-full pl-10 pr-3 py-2 border border-white/10 rounded-lg leading-5 bg-black/50 text-gray-300 placeholder-gray-500 focus:outline-none focus:bg-black/80 focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary sm:text-sm transition-all duration-300"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    window.location.href = `/?search=${e.currentTarget.value}`;
+                                }
+                            }}
+                        />
+                    </div>
+                </div>
+
                 <div className="flex items-center gap-4">
+                    <ThemeToggle />
                     {user ? (
                         <Link to="/user/profile" className="p-2 text-gray-400 hover:text-white transition-colors" title="My Account">
                             <User size={24} />

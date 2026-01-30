@@ -8,7 +8,8 @@ import {
     Menu,
     X,
     ChevronRight,
-    Home
+    Home,
+    Heart
 } from 'lucide-react';
 
 interface NavItem {
@@ -20,6 +21,7 @@ interface NavItem {
 const navItems: NavItem[] = [
     { name: 'My Profile', path: '/user/profile', icon: User },
     { name: 'My Orders', path: '/user/orders', icon: ShoppingBag },
+    { name: 'Wishlist', path: '/user/wishlist', icon: Heart },
 ];
 
 const UserLayout: React.FC = () => {
