@@ -42,35 +42,41 @@ const Navbar = ({ cartCount = 0, onOpenCart, onOpenMobileMenu }: NavbarProps) =>
     };
 
     return (
-        <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-cyber-black/80 backdrop-blur-xl border-b border-white/5 py-4' : 'bg-transparent py-6'}`} dir={dir}>
-            <div className="container mx-auto px-6 flex justify-between items-center">
-                <div className="flex items-center gap-3 flex-shrink-0">
-                    <div className="w-10 h-10 bg-gradient-to-br from-cyber-primary to-cyber-accent rounded-lg flex items-center justify-center text-white font-bold text-xl shadow-[0_0_15px_rgba(99,102,241,0.4)] flex-shrink-0">
-                        C
+        <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-cyber-black/80 backdrop-blur-xl border-b border-white/5 py-3' : 'bg-transparent py-5'}`} dir={dir}>
+            <div className="container mx-auto px-4 lg:px-6 flex items-center justify-between gap-4">
+                {/* Left Section: Logo + Nav Links */}
+                <div className="flex items-center gap-6 md:gap-8 flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 bg-gradient-to-br from-cyber-primary to-cyber-accent rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-[0_0_15px_rgba(99,102,241,0.4)] flex-shrink-0">
+                            C
+                        </div>
+                        <Link to="/" className="text-xl md:text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 whitespace-nowrap">
+                            Cortex<span className="text-cyber-primary">File</span>
+                        </Link>
                     </div>
-                    <Link to="/" className="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 whitespace-nowrap">
-                        Cortex<span className="text-cyber-primary">File</span>
-                    </Link>
+
+                    <div className="hidden lg:flex items-center gap-6">
+                        <Link to="/#products" className="text-gray-400 hover:text-white transition-colors text-xs font-medium uppercase tracking-widest hover:neon-text whitespace-nowrap">{t('nav.products')}</Link>
+                        <Link to="/#features" className="text-gray-400 hover:text-white transition-colors text-xs font-medium uppercase tracking-widest hover:neon-text whitespace-nowrap">{t('nav.features')}</Link>
+                        <Link to="/#testimonials" className="text-gray-400 hover:text-white transition-colors text-xs font-medium uppercase tracking-widest hover:neon-text whitespace-nowrap">{t('nav.testimonials')}</Link>
+                        <Link to="/blog" className="text-gray-400 hover:text-white transition-colors text-xs font-medium uppercase tracking-widest hover:neon-text whitespace-nowrap">
+                            {t('nav.blog')}
+                        </Link>
+                    </div>
                 </div>
 
-                <div className="hidden md:flex items-center gap-8">
-                    <Link to="/#products" className="text-gray-400 hover:text-white transition-colors text-sm font-medium uppercase tracking-widest hover:neon-text">{t('nav.products')}</Link>
-                    <Link to="/#features" className="text-gray-400 hover:text-white transition-colors text-sm font-medium uppercase tracking-widest hover:neon-text">{t('nav.features')}</Link>
-                    <Link to="/#testimonials" className="text-gray-400 hover:text-white transition-colors text-sm font-medium uppercase tracking-widest hover:neon-text">{t('nav.testimonials')}</Link>
-                    <Link to="/blog" className="text-gray-400 hover:text-white transition-colors text-sm font-medium uppercase tracking-widest hover:neon-text">
-                        {t('nav.blog')}
-                    </Link>
-                </div>
 
-                <div className="flex-1 max-w-md mx-8 hidden md:block">
+
+                {/* Center Section: Search Bar (smaller width) */}
+                <div className="hidden md:block flex-1 max-w-[200px] lg:max-w-xs mx-4">
                     <div className="relative group">
                         <div className={`absolute inset-y-0 ${dir === 'rtl' ? 'right-0 pr-3' : 'left-0 pl-3'} flex items-center pointer-events-none`}>
-                            <Search className="h-5 w-5 text-gray-500 group-focus-within:text-cyber-primary transition-colors" />
+                            <Search className="h-4 w-4 text-gray-500 group-focus-within:text-cyber-primary transition-colors" />
                         </div>
                         <input
                             type="text"
                             placeholder={t('common.searchPlaceholder')}
-                            className={`block w-full ${dir === 'rtl' ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border border-white/10 rounded-lg leading-5 bg-black/50 text-gray-300 placeholder-gray-500 focus:outline-none focus:bg-black/80 focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary sm:text-sm transition-all duration-300`}
+                            className={`block w-full ${dir === 'rtl' ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-1.5 border border-white/10 rounded-lg leading-5 bg-black/50 text-gray-300 placeholder-gray-500 focus:outline-none focus:bg-black/80 focus:border-cyber-primary focus:ring-1 focus:ring-cyber-primary text-xs transition-all duration-300`}
                             dir={dir}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
