@@ -5,6 +5,8 @@ import ProductDetails from './src/ProductDetails';
 import Login from './src/Login';
 import ForgotPassword from './src/ForgotPassword';
 import ResetPassword from './src/ResetPassword';
+import Blog from './src/Blog';
+import BlogPost from './src/BlogPost';
 import ProtectedRoute from './src/components/ProtectedRoute';
 
 // Lazy load Admin components
@@ -14,6 +16,7 @@ const ProductsPage = lazy(() => import('./src/admin/ProductsPage'));
 const AppearancePage = lazy(() => import('./src/admin/AppearancePage'));
 const TestimonialsPage = lazy(() => import('./src/admin/TestimonialsPage'));
 const FeaturesPage = lazy(() => import('./src/admin/FeaturesPage'));
+const BlogPage = lazy(() => import('./src/admin/BlogPage'));
 const MediaPage = lazy(() => import('./src/admin/MediaPage'));
 
 // Loading Fallback
@@ -37,12 +40,15 @@ const App = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
 
           {/* Admin Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="products" element={<ProductsPage />} />
+              <Route path="blog" element={<BlogPage />} />
               <Route path="appearance" element={<AppearancePage />} />
               <Route path="testimonials" element={<TestimonialsPage />} />
               <Route path="features" element={<FeaturesPage />} />
