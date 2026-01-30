@@ -316,6 +316,8 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onComplete }: any) => {
 // --- Main App Component ---
 
 const Store = () => {
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -343,6 +345,8 @@ const Store = () => {
     if (data) setSiteSettings(data);
     setSettingsLoading(false);
   };
+  // ... existing code ...
+
 
   const fetchProducts = async () => {
     const { data, error } = await supabase.from('products').select('*');
@@ -562,7 +566,7 @@ const Store = () => {
         cartItems={cart}
         onRemove={removeFromCart}
         onUpdateQuantity={updateQuantity}
-        onCheckout={() => { setIsCartOpen(false); setIsCheckoutOpen(true); }}
+        onCheckout={() => { setIsCartOpen(false); navigate('/checkout'); }}
       />
 
       <CheckoutModal

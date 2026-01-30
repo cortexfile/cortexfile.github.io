@@ -12,7 +12,8 @@ import {
     Menu,
     X,
     ChevronRight,
-    Settings
+    Settings,
+    ShoppingBag
 } from 'lucide-react';
 
 interface NavItem {
@@ -23,6 +24,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+    { name: 'Orders', path: '/admin/orders', icon: ShoppingBag },
     { name: 'Products', path: '/admin/products', icon: Package },
     { name: 'Appearance', path: '/admin/appearance', icon: Palette },
     { name: 'Testimonials', path: '/admin/testimonials', icon: Star },
