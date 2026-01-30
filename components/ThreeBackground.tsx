@@ -1,7 +1,59 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { supabase } from '../src/supabaseClient';
+
+interface ParticleSettings {
+  color: string;
+  speed: number;
+  density: number;
+}
 
 const ThreeBackground: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [settings, setSettings] = useState<ParticleSettings>({
+    color: '#6366f1',
+    speed: 1.0,
+    density: 80
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase.from('site_settings').select('particle_color, particle_speed, particle_density').single();
+      if (data) {
+        setSettings({
+          color: data.particle_color || '#6366f1',
+          speed: data.particle_speed || 1.0,
+          density: data.particle_density || 80
+        });
+      }
+    };
+    fetchSettings();
+
+    // Subscribe to realtime changes
+    const channel = supabase.channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'site_settings',
+        },
+        (payload) => {
+          const newData = payload.new;
+          if (newData) {
+            setSettings({
+              color: newData.particle_color || '#6366f1',
+              speed: newData.particle_speed || 1.0,
+              density: newData.particle_density || 80
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -44,7 +96,10 @@ const ThreeBackground: React.FC = () => {
 
     // Create a particle - spread across entire screen
     const createParticle = (): ParticleData => {
-      const colors = ['#6366f1', '#8b5cf6', '#d946ef', '#00f3ff', '#a855f7', '#22d3ee', '#f472b6'];
+      // Use the primary color from settings, plus some variations
+      const baseColor = settings.color;
+      // Simplified color variation (in a real app, you'd parse hex and shift hue)
+
       const x = Math.random() * width;
       const y = Math.random() * height;
       return {
@@ -52,12 +107,12 @@ const ThreeBackground: React.FC = () => {
         y: y,
         baseX: x,
         baseY: y,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: (Math.random() - 0.5) * 0.8,
+        vx: (Math.random() - 0.5) * 0.8 * settings.speed,
+        vy: (Math.random() - 0.5) * 0.8 * settings.speed,
         radius: Math.random() * 3 + 2,
-        color: colors[Math.floor(Math.random() * colors.length)],
+        color: baseColor,
         pulsePhase: Math.random() * Math.PI * 2,
-        pulseSpeed: Math.random() * 0.02 + 0.01,
+        pulseSpeed: (Math.random() * 0.02 + 0.01) * settings.speed,
       };
     };
 
@@ -101,7 +156,7 @@ const ThreeBackground: React.FC = () => {
       // Outer glow
       const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, size * 6);
       gradient.addColorStop(0, p.color);
-      gradient.addColorStop(0.3, p.color + 'aa');
+      gradient.addColorStop(0.3, p.color + 'aa'); // varied opacity
       gradient.addColorStop(0.6, p.color + '44');
       gradient.addColorStop(1, 'transparent');
 
@@ -123,7 +178,8 @@ const ThreeBackground: React.FC = () => {
     // Initialize particles - more spread out
     const initParticles = () => {
       particles = [];
-      const count = Math.min(80, Math.floor((width * height) / 25000));
+      // Use density setting
+      const count = Math.min(150, Math.floor(((width * height) / 25000) * (settings.density / 80)));
       for (let i = 0; i < count; i++) {
         particles.push(createParticle());
       }
@@ -169,8 +225,15 @@ const ThreeBackground: React.FC = () => {
       if (mouseX < 0 || mouseY < 0) return;
 
       const gradient = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 150);
-      gradient.addColorStop(0, 'rgba(99, 102, 241, 0.15)');
-      gradient.addColorStop(0.5, 'rgba(217, 70, 239, 0.08)');
+      // Use main color for trail
+      const colorRGB = hexToRgb(settings.color);
+      if (colorRGB) {
+        gradient.addColorStop(0, `rgba(${colorRGB.r}, ${colorRGB.g}, ${colorRGB.b}, 0.15)`);
+        gradient.addColorStop(0.5, `rgba(${colorRGB.r}, ${colorRGB.g}, ${colorRGB.b}, 0.08)`);
+      } else {
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.15)');
+        gradient.addColorStop(0.5, 'rgba(99, 102, 241, 0.08)');
+      }
       gradient.addColorStop(1, 'transparent');
 
       ctx.beginPath();
@@ -178,6 +241,16 @@ const ThreeBackground: React.FC = () => {
       ctx.fillStyle = gradient;
       ctx.fill();
     };
+
+    // Helper: Hex to RGB
+    function hexToRgb(hex: string) {
+      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    }
 
     let time = 0;
 
@@ -194,8 +267,16 @@ const ThreeBackground: React.FC = () => {
         width / 2, height / 2, 0,
         width / 2, height / 2, width / 2
       );
-      bgGradient.addColorStop(0, 'rgba(99, 102, 241, 0.03)');
-      bgGradient.addColorStop(0.5, 'rgba(217, 70, 239, 0.02)');
+
+      const colorRGB = hexToRgb(settings.color);
+      if (colorRGB) {
+        bgGradient.addColorStop(0, `rgba(${colorRGB.r}, ${colorRGB.g}, ${colorRGB.b}, 0.03)`);
+        bgGradient.addColorStop(0.5, `rgba(${colorRGB.r}, ${colorRGB.g}, ${colorRGB.b}, 0.02)`);
+      } else {
+        bgGradient.addColorStop(0, 'rgba(99, 102, 241, 0.03)');
+        bgGradient.addColorStop(0.5, 'rgba(217, 70, 239, 0.02)');
+      }
+
       bgGradient.addColorStop(1, 'transparent');
       ctx.fillStyle = bgGradient;
       ctx.fillRect(0, 0, width, height);
@@ -242,7 +323,7 @@ const ThreeBackground: React.FC = () => {
       document.removeEventListener('mouseleave', handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
     };
-  }, []);
+  }, [settings]); // Re-run when settings change
 
   return (
     <canvas

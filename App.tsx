@@ -8,6 +8,10 @@ import ResetPassword from './src/ResetPassword';
 import Blog from './src/Blog';
 import BlogPost from './src/BlogPost';
 import Checkout from './src/Checkout';
+import UserLayout from './src/user/UserLayout';
+import ProfilePage from './src/user/ProfilePage';
+import UserOrdersPage from './src/user/UserOrdersPage';
+
 import ProtectedRoute from './src/components/ProtectedRoute';
 
 // Lazy load Admin components
@@ -46,9 +50,16 @@ const App = () => {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/checkout" element={<Checkout />} />
 
+          {/* User Routes - Protected by default via UserLayout logic or Auth Guard if needed */}
+          <Route path="/user" element={<UserLayout />}>
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="orders" element={<UserOrdersPage />} />
+          </Route>
+
           {/* Admin Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminLayout />}>
+// ... existing admin routes
               <Route index element={<Dashboard />} />
               <Route path="orders" element={<OrdersPage />} />
               <Route path="products" element={<ProductsPage />} />

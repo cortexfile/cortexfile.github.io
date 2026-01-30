@@ -14,6 +14,9 @@ interface SiteSettings {
     hero_image: string;
     hero_button_text: string;
     footer_text: string;
+    particle_color?: string;
+    particle_speed?: number;
+    particle_density?: number;
 }
 
 const AppearancePage: React.FC = () => {
@@ -69,7 +72,7 @@ const AppearancePage: React.FC = () => {
         }
     };
 
-    const updateField = (field: keyof SiteSettings, value: string) => {
+    const updateField = (field: keyof SiteSettings, value: string | number) => {
         if (settings) {
             setSettings({ ...settings, [field]: value });
         }
@@ -248,6 +251,56 @@ const AppearancePage: React.FC = () => {
                         value={settings.footer_text}
                         onChange={(e) => updateField('footer_text', e.target.value)}
                     />
+                </div>
+            </div>
+
+            {/* Particle Settings Section */}
+            <div className="bg-cyber-card border border-white/5 rounded-2xl p-6">
+                <h2 className="text-xl font-bold text-white mb-6">Particle Background</h2>
+                <div className="space-y-6">
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1">Particle Color</label>
+                        <div className="flex gap-2">
+                            <input
+                                type="color"
+                                className="w-12 h-12 rounded-lg cursor-pointer bg-transparent border border-white/10"
+                                value={settings.particle_color || '#6366f1'}
+                                onChange={(e) => updateField('particle_color', e.target.value)}
+                            />
+                            <input
+                                type="text"
+                                className="flex-1 bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-cyber-primary focus:outline-none font-mono"
+                                value={settings.particle_color || '#6366f1'}
+                                onChange={(e) => updateField('particle_color', e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1">Animation Speed ({settings.particle_speed || 1.0}x)</label>
+                        <input
+                            type="range"
+                            min="0.1"
+                            max="5.0"
+                            step="0.1"
+                            className="w-full"
+                            value={settings.particle_speed || 1.0}
+                            onChange={(e) => updateField('particle_speed', parseFloat(e.target.value))}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm text-gray-400 mb-1">Density ({settings.particle_density || 80} particles)</label>
+                        <input
+                            type="range"
+                            min="20"
+                            max="200"
+                            step="10"
+                            className="w-full"
+                            value={settings.particle_density || 80}
+                            onChange={(e) => updateField('particle_density', parseInt(e.target.value))}
+                        />
+                    </div>
                 </div>
             </div>
         </div>
