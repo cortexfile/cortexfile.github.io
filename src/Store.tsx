@@ -179,7 +179,14 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemove, on
 };
 
 // 4. Hero Section
-const Hero = () => {
+interface SiteSettings {
+  hero_title: string;
+  hero_subtitle: string;
+  hero_button_text: string;
+  hero_image: string;
+}
+
+const Hero = ({ settings, isLoading }: { settings: SiteSettings | null; isLoading: boolean }) => {
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
@@ -194,17 +201,17 @@ const Hero = () => {
         <motion.div style={{ y: y1 }} className="space-y-6">
 
           <h1 className="text-5xl md:text-7xl font-extrabold leading-tight tracking-tight">
-            Execute Your <br />
+            {(settings?.hero_title || 'Execute Your Potential').split(' ').slice(0, -1).join(' ')} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon via-white to-cyber-primary animate-pulse-slow">
-              Potential
+              {(settings?.hero_title || 'Execute Your Potential').split(' ').slice(-1)[0]}
             </span>
           </h1>
           <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
-            The world's most advanced marketplace for high-performance EXE tools, System utilities, and developer assets. Optimized for the future.
+            {settings?.hero_subtitle || 'The world\'s most advanced marketplace for high-performance EXE tools, System utilities, and developer assets. Optimized for the future.'}
           </p>
           <div className="flex gap-4">
             <Button size="lg" onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}>
-              Explore Store <ChevronRight className="ml-2 w-5 h-5" />
+              {settings?.hero_button_text || 'Explore Store'} <ChevronRight className="ml-2 w-5 h-5" />
             </Button>
             <Button size="lg" variant="outline">
               View Demo
@@ -228,11 +235,18 @@ const Hero = () => {
         <motion.div style={{ y: y2 }} className="hidden md:block relative">
           <div className="relative z-10 w-full h-[600px] rounded-2xl border border-white/10 glass-panel shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-tr from-cyber-primary/20 to-transparent opacity-50" />
-            <img
-              src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1965&auto=format&fit=crop"
-              alt="Dashboard Preview"
-              className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000"
-            />
+            {!isLoading && (
+              <img
+                src={settings?.hero_image || 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1965&auto=format&fit=crop'}
+                alt="Dashboard Preview"
+                className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-1000"
+              />
+            )}
+            {isLoading && (
+              <div className="w-full h-full flex items-center justify-center bg-cyber-dark">
+                <div className="w-12 h-12 border-4 border-cyber-primary border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
 
             {/* Holographic UI Elements */}
             <div className="absolute top-10 right-10 p-4 glass-panel rounded-xl animate-float">
@@ -351,10 +365,19 @@ const Store = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
 
   useEffect(() => {
     fetchProducts();
+    fetchSiteSettings();
   }, []);
+
+  const fetchSiteSettings = async () => {
+    const { data } = await supabase.from('site_settings').select('*').limit(1).single();
+    if (data) setSiteSettings(data);
+    setSettingsLoading(false);
+  };
 
   const fetchProducts = async () => {
     const { data, error } = await supabase.from('products').select('*');
@@ -425,7 +448,7 @@ const Store = () => {
       />
 
       <main className="space-y-32 pb-32">
-        <Hero />
+        <Hero settings={siteSettings} isLoading={settingsLoading} />
 
         {/* Featured / Products Section */}
         <section id="products" className="container mx-auto px-6">
