@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Store from './src/Store';
 import ProductDetails from './src/ProductDetails';
 import Login from './src/Login';
+import ForgotPassword from './src/ForgotPassword';
+import ResetPassword from './src/ResetPassword';
 import ProtectedRoute from './src/components/ProtectedRoute';
 
 // Lazy load Admin components
@@ -33,6 +35,8 @@ const App = () => {
           <Route path="/" element={<Store />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Admin Routes */}
           <Route element={<ProtectedRoute />}>
