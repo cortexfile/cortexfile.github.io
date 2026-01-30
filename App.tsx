@@ -12,6 +12,7 @@ import AppearancePage from './src/admin/AppearancePage';
 import TestimonialsPage from './src/admin/TestimonialsPage';
 import FeaturesPage from './src/admin/FeaturesPage';
 import MediaPage from './src/admin/MediaPage';
+import ProtectedRoute from './src/components/ProtectedRoute';
 
 const App = () => {
   return (
@@ -23,13 +24,15 @@ const App = () => {
         <Route path="/login" element={<Login />} />
 
         {/* Admin Routes */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="appearance" element={<AppearancePage />} />
-          <Route path="testimonials" element={<TestimonialsPage />} />
-          <Route path="features" element={<FeaturesPage />} />
-          <Route path="media" element={<MediaPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="appearance" element={<AppearancePage />} />
+            <Route path="testimonials" element={<TestimonialsPage />} />
+            <Route path="features" element={<FeaturesPage />} />
+            <Route path="media" element={<MediaPage />} />
+          </Route>
         </Route>
       </Routes>
     </Router>
