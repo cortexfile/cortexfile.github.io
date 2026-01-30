@@ -371,7 +371,18 @@ const Store = () => {
   useEffect(() => {
     fetchProducts();
     fetchSiteSettings();
+
+    // Load cart from localStorage
+    const savedCart = localStorage.getItem('cortex_cart');
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
+    }
   }, []);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('cortex_cart', JSON.stringify(cart));
+  }, [cart]);
 
   const fetchSiteSettings = async () => {
     const { data } = await supabase.from('site_settings').select('*').limit(1).single();
