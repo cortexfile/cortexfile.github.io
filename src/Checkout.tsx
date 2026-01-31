@@ -39,7 +39,7 @@ const Checkout = () => {
             user_email: formData.email,
             products: cart,
             total: total,
-            status: 'pending',
+            status: 'completed', // Auto-complete for instant access in this demo
             customer_details: formData,
         };
 

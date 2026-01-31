@@ -7,6 +7,7 @@ interface Stats {
     totalProducts: number;
     totalTestimonials: number;
     totalFeatures: number;
+    revenue: number;
 }
 
 interface Product {
@@ -18,7 +19,7 @@ interface Product {
 }
 
 const Dashboard: React.FC = () => {
-    const [stats, setStats] = useState<Stats>({ totalProducts: 0, totalTestimonials: 0, totalFeatures: 0 });
+    const [stats, setStats] = useState<Stats>({ totalProducts: 0, totalTestimonials: 0, totalFeatures: 0, revenue: 0 });
     const [recentProducts, setRecentProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -35,10 +36,18 @@ const Dashboard: React.FC = () => {
                 supabase.from('features').select('*', { count: 'exact', head: true }),
             ]);
 
+            // Fetch revenue from all orders for debugging
+            const { data: revenueData } = await supabase
+                .from('orders')
+                .select('total');
+
+            const totalRevenue = revenueData?.reduce((sum, order) => sum + (order.total || 0), 0) || 0;
+
             setStats({
                 totalProducts: productsRes.count || 0,
                 totalTestimonials: testimonialsRes.count || 0,
                 totalFeatures: featuresRes.count || 0,
+                revenue: totalRevenue
             });
 
             // Fetch recent products
@@ -114,7 +123,7 @@ const Dashboard: React.FC = () => {
                 />
                 <StatCard
                     title="Revenue"
-                    value="$0"
+                    value={`$${stats.revenue.toFixed(2)}`}
                     icon={DollarSign}
                     color="bg-gradient-to-br from-amber-500 to-orange-600"
                 />
