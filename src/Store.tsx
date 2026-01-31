@@ -1,108 +1,81 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ShoppingCart, Search, Star, Download, Shield, Lock, Zap, Code, Gamepad2, Wrench, Sparkles, ChevronDown, Check, X, Menu, CreditCard, Bitcoin, MessageCircle, Play, Eye, Heart, TrendingUp } from 'lucide-react';
 import * as THREE from 'three';
+import { supabase } from './supabaseClient';
+import { Product } from '../types';
+
+// Extended Product type for UI-specific fields not in DB
+interface UIProduct extends Product {
+  trending?: boolean;
+}
 
 const Store = () => {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState<any[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [darkMode, setDarkMode] = useState(true);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState<UIProduct | null>(null);
   const [checkoutStep, setCheckoutStep] = useState(0);
-  const [expandedFaq, setExpandedFaq] = useState(null);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSuccess, setNewsletterSuccess] = useState(false);
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const canvasRef = useRef(null);
-  const heroCanvasRef = useRef(null);
 
-  // Products data
-  const products = [
-    {
-      id: 1,
-      name: 'Quantum Code Editor Pro',
-      category: 'tools',
-      price: 149.99,
-      image: '🚀',
-      rating: 4.9,
-      reviews: 2847,
-      downloads: 125000,
-      description: 'Next-gen AI-powered code editor with quantum syntax prediction',
-      features: ['AI Code Completion', 'Real-time Collaboration', 'Multi-language Support', 'Dark Theme Suite'],
-      trending: true
-    },
-    {
-      id: 2,
-      name: 'Neural Game Optimizer',
-      category: 'games',
-      price: 79.99,
-      image: '🎮',
-      rating: 4.8,
-      reviews: 5621,
-      downloads: 340000,
-      description: 'AI-driven game performance optimizer for maximum FPS',
-      features: ['Auto-optimization', 'FPS Booster', 'RAM Management', 'GPU Acceleration'],
-      trending: true
-    },
-    {
-      id: 3,
-      name: 'CyberVault Security Suite',
-      category: 'tools',
-      price: 199.99,
-      image: '🔐',
-      rating: 5.0,
-      reviews: 1923,
-      downloads: 89000,
-      description: 'Military-grade encryption and security management system',
-      features: ['256-bit Encryption', 'Password Manager', 'VPN Integration', 'Biometric Auth'],
-      trending: false
-    },
-    {
-      id: 4,
-      name: 'HyperDesign Studio',
-      category: 'apps',
-      price: 249.99,
-      image: '🎨',
-      rating: 4.9,
-      reviews: 3412,
-      downloads: 156000,
-      description: 'Professional design suite with AI-powered creativity tools',
-      features: ['Vector Graphics', 'AI Image Gen', '3D Modeling', 'Animation Tools'],
-      trending: true
-    },
-    {
-      id: 5,
-      name: 'StreamPro Broadcasting',
-      category: 'apps',
-      price: 129.99,
-      image: '📡',
-      rating: 4.7,
-      reviews: 4567,
-      downloads: 278000,
-      description: 'Professional streaming software with AI scene detection',
-      features: ['Multi-platform', 'AI Filters', '4K Streaming', 'Chat Integration'],
-      trending: false
-    },
-    {
-      id: 6,
-      name: 'DataForge Analytics',
-      category: 'tools',
-      price: 299.99,
-      image: '📊',
-      rating: 4.9,
-      reviews: 1834,
-      downloads: 67000,
-      description: 'Advanced data analytics and visualization platform',
-      features: ['Real-time Analytics', 'Custom Dashboards', 'ML Predictions', 'API Integration'],
-      trending: false
+  // Real data state
+  const [products, setProducts] = useState<UIProduct[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const heroCanvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    fetchProducts();
+
+    // Load cart
+    const savedCart = localStorage.getItem('cortex_cart');
+    if (savedCart) {
+      setCart(JSON.parse(savedCart));
     }
-  ];
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('cortex_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.from('products').select('*');
+
+      if (error) throw error;
+
+      if (data) {
+        // Map DB data to UI format
+        const mappedProducts: UIProduct[] = data.map(p => ({
+          ...p,
+          // Generate valid features array if null
+          features: p.features || ['Premium Feature', '24/7 Support', 'Instant Download'],
+          // Randomize trending for demo variation
+          trending: Math.random() > 0.7,
+          // Ensure rating has value
+          rating: p.rating || 5.0,
+          reviews: p.reviews || 0,
+          downloads: p.downloads || 0
+        }));
+        setProducts(mappedProducts);
+      }
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const categories = [
     { id: 'all', name: 'All Products', icon: Sparkles, color: 'from-purple-500 to-pink-500' },
-    { id: 'games', name: 'Gaming', icon: Gamepad2, color: 'from-red-500 to-orange-500' },
-    { id: 'tools', name: 'Tools', icon: Wrench, color: 'from-blue-500 to-cyan-500' },
+    { id: 'gaming', name: 'Gaming', icon: Gamepad2, color: 'from-red-500 to-orange-500' }, // Changed 'games' to 'gaming' to match logic usually, but let's map it
+    { id: 'utility', name: 'Tools', icon: Wrench, color: 'from-blue-500 to-cyan-500' },
     { id: 'apps', name: 'Applications', icon: Code, color: 'from-green-500 to-emerald-500' }
   ];
 
@@ -187,10 +160,12 @@ const Store = () => {
     let mouseX = 0;
     let mouseY = 0;
 
-    document.addEventListener('mousemove', (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
-    });
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
 
     const animate = () => {
       requestAnimationFrame(animate);
@@ -214,6 +189,7 @@ const Store = () => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('mousemove', handleMouseMove);
     };
   }, [darkMode]);
 
@@ -271,7 +247,7 @@ const Store = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const addToCart = (product) => {
+  const addToCart = (product: UIProduct) => {
     const existing = cart.find(item => item.id === product.id);
     if (existing) {
       setCart(cart.map(item =>
@@ -283,11 +259,11 @@ const Store = () => {
     setShowCart(true);
   };
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = (productId: string) => {
     setCart(cart.filter(item => item.id !== productId));
   };
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity === 0) {
       removeFromCart(productId);
     } else {
@@ -299,14 +275,27 @@ const Store = () => {
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      // Map DB category to Filter ID
+      // Utility -> utility
+      // Gaming -> gaming
+      // Design -> apps (approximate mapping)
+      // Security -> utility (grouping security under tools)
 
-  const handleNewsletterSubmit = (e) => {
+      let productCat = 'other';
+      if (product.category === 'Utility' || product.category === 'Security') productCat = 'utility';
+      if (product.category === 'Gaming') productCat = 'gaming';
+      if (product.category === 'Design') productCat = 'apps';
+
+      const matchesCategory = selectedCategory === 'all' || productCat === selectedCategory;
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, selectedCategory, searchQuery]);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setNewsletterSuccess(true);
     setTimeout(() => {
@@ -424,7 +413,14 @@ const Store = () => {
                       }}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="text-4xl">{item.image}</div>
+                        {/* Image Rendering Logic */}
+                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+                          {item.image.includes('http') ? (
+                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="text-3xl">{item.image}</span>
+                          )}
+                        </div>
                         <div className="flex-1">
                           <h3 className="font-semibold">{item.name}</h3>
                           <p className="text-sm opacity-60">${item.price}</p>
@@ -501,7 +497,7 @@ const Store = () => {
 
                 <div className="flex flex-wrap gap-4">
                   <button
-                    onClick={() => document.getElementById('products').scrollIntoView({ behavior: 'smooth' })}
+                    onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
                     className="px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 font-bold text-white hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
                   >
                     Browse Products
@@ -513,7 +509,7 @@ const Store = () => {
 
                 <div className="flex items-center gap-8 pt-4">
                   <div>
-                    <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">500K+</div>
+                    <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">~500K</div>
                     <div className="text-sm opacity-60">Happy Customers</div>
                   </div>
                   <div>
@@ -580,73 +576,87 @@ const Store = () => {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product, index) => (
-                <div
-                  key={product.id}
-                  className="group relative p-6 rounded-3xl backdrop-blur-xl border transition-all duration-500 hover:border-purple-500 cursor-pointer transform hover:scale-105 hover:rotate-1"
-                  style={{
-                    background: darkMode ? 'rgba(31, 41, 55, 0.4)' : 'rgba(255, 255, 255, 0.6)',
-                    borderColor: 'rgba(139, 92, 246, 0.2)',
-                    animationDelay: `${index * 100}ms`
-                  }}
-                  onClick={() => setSelectedProduct(product)}
-                >
-                  {product.trending && (
-                    <div className="absolute -top-3 -right-3 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold flex items-center gap-1 animate-bounce">
-                      <TrendingUp className="w-3 h-3" />
-                      Trending
-                    </div>
-                  )}
-
-                  <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform duration-300">
-                    {product.image}
-                  </div>
-
-                  <h3 className="text-xl font-bold mb-2 group-hover:text-purple-400 transition-colors">
-                    {product.name}
-                  </h3>
-
-                  <p className="opacity-60 text-sm mb-4 line-clamp-2">
-                    {product.description}
-                  </p>
-
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'}`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm font-semibold">{product.rating}</span>
-                    <span className="text-sm opacity-50">({product.reviews})</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 mb-4 text-sm opacity-60">
-                    <Download className="w-4 h-4" />
-                    <span>{(product.downloads / 1000).toFixed(0)}K downloads</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                      ${product.price}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        addToCart(product);
-                      }}
-                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-
-                  {/* Hover glow effect */}
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" />
+              {loading ? (
+                <div className="col-span-full h-64 flex items-center justify-center">
+                  <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
                 </div>
-              ))}
+              ) : filteredProducts.length === 0 ? (
+                <div className="col-span-full text-center py-20 opacity-50">
+                  <p className="text-xl">No products found matching your criteria.</p>
+                </div>
+              ) : (
+                filteredProducts.map((product, index) => (
+                  <div
+                    key={product.id}
+                    className="group relative p-6 rounded-3xl backdrop-blur-xl border transition-all duration-500 hover:border-purple-500 cursor-pointer transform hover:scale-105 hover:rotate-1"
+                    style={{
+                      background: darkMode ? 'rgba(31, 41, 55, 0.4)' : 'rgba(255, 255, 255, 0.6)',
+                      borderColor: 'rgba(139, 92, 246, 0.2)',
+                      animationDelay: `${index * 100}ms`
+                    }}
+                    onClick={() => setSelectedProduct(product)}
+                  >
+                    {product.trending && (
+                      <div className="absolute -top-3 -right-3 px-3 py-1 rounded-full bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold flex items-center gap-1 animate-bounce">
+                        <TrendingUp className="w-3 h-3" />
+                        Trending
+                      </div>
+                    )}
+
+                    <div className="h-48 mb-4 overflow-hidden rounded-xl flex items-center justify-center bg-gray-800/50">
+                      {product.image.includes('http') ? (
+                        <img src={product.image} alt={product.name} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                      ) : (
+                        <span className="text-6xl">{product.image}</span>
+                      )}
+                    </div>
+
+                    <h3 className="text-xl font-bold mb-2 group-hover:text-purple-400 transition-colors">
+                      {product.name}
+                    </h3>
+
+                    <p className="opacity-60 text-sm mb-4 line-clamp-2">
+                      {product.description}
+                    </p>
+
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-semibold">{product.rating}</span>
+                      <span className="text-sm opacity-50">({product.reviews})</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 mb-4 text-sm opacity-60">
+                      <Download className="w-4 h-4" />
+                      <span>{(product.downloads / 1000).toFixed(0)}K downloads</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        ${product.price}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCart(product);
+                        }}
+                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
+
+                    {/* Hover glow effect */}
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" />
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </section>
@@ -908,7 +918,13 @@ const Store = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-start justify-between mb-6">
-                <div className="text-6xl">{selectedProduct.image}</div>
+                <div className="text-6xl text-center w-24 h-24 bg-gray-800/50 rounded-xl flex items-center justify-center overflow-hidden">
+                  {selectedProduct.image.includes('http') ? (
+                    <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" />
+                  ) : (
+                    selectedProduct.image
+                  )}
+                </div>
                 <button onClick={() => setSelectedProduct(null)} className="p-2 hover:bg-purple-500/20 rounded-lg transition-colors">
                   <X className="w-6 h-6" />
                 </button>
