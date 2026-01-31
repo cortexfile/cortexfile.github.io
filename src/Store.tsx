@@ -3,8 +3,8 @@ import { supabase } from './supabaseClient';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import {
   ShoppingCart, Search, Menu, X, Star, Download, Shield, Zap,
-  Cpu, ChevronRight, Github, Twitter, Linkedin, Monitor,
-  Smartphone, Globe, CheckCircle, CreditCard, Box
+  Cpu, ChevronRight, ChevronDown, Github, Twitter, Linkedin, Monitor,
+  Smartphone, Globe, CheckCircle, CreditCard, Box, Youtube, Play
 } from 'lucide-react';
 import { MOCK_PRODUCTS, TESTIMONIALS } from '../constants';
 import { Product, CartItem, SortOption } from '../types';
@@ -273,6 +273,53 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onComplete }: any) => {
   );
 };
 
+// 6. FAQ Section
+const FAQ = () => {
+  const { t } = useLanguage();
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const toggle = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
+  const faqs = [1, 2, 3, 4, 5];
+
+  return (
+    <section className="container mx-auto px-6 max-w-4xl">
+      <SectionTitle title={t('faq.title')} subtitle="" />
+      <div className="space-y-4">
+        {faqs.map((i) => (
+          <div key={i} className="bg-cyber-card border border-white/5 rounded-2xl overflow-hidden transition-all duration-300">
+            <button
+              onClick={() => toggle(i)}
+              className="w-full flex items-center justify-between p-6 text-left hover:bg-white/5 transition-colors"
+            >
+              <span className="font-bold text-lg">{t(`faq.q${i}`)}</span>
+              <ChevronDown
+                className={`text-cyber-primary transition-transform duration-300 ${openIndex === i ? 'rotate-180' : ''}`}
+              />
+            </button>
+            <AnimatePresence>
+              {openIndex === i && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="p-6 pt-0 text-gray-400 leading-relaxed border-t border-white/5 mt-2">
+                    {t(`faq.a${i}`)}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
 // --- Main App Component ---
 
 const Store = () => {
@@ -475,6 +522,9 @@ const Store = () => {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        <FAQ />
+
         {/* Newsletter */}
         <section className="container mx-auto px-6">
           <div className="bg-gradient-to-r from-cyber-primary to-cyber-accent rounded-3xl p-12 text-center relative overflow-hidden">
@@ -494,36 +544,64 @@ const Store = () => {
       <footer className="border-t border-white/10 bg-cyber-black py-16">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 text-sm text-gray-500">
           <div className="space-y-4">
-            <div className="text-2xl font-bold text-white">Cortex<span className="text-cyber-primary">File</span></div>
+            <div className="flex items-center gap-2 text-2xl font-bold text-white">
+              <Zap className="text-cyber-primary fill-current" /> Cortex<span className="text-cyber-primary">File</span>
+            </div>
             <p>{t('footer.desc')}</p>
           </div>
+
           <div>
-            <h4 className="text-white font-bold mb-4">{t('footer.platform')}</h4>
-            <ul className="space-y-2">
-              <li><a href="#" className="hover:text-cyber-primary">{t('footer.browseAll')}</a></li>
-              <li><a href="#" className="hover:text-cyber-primary">{t('footer.sellSoftware')}</a></li>
-              <li><a href="#" className="hover:text-cyber-primary">{t('footer.apiAccess')}</a></li>
+            <h4 className="text-white font-bold mb-6 text-lg">{t('nav.products')}</h4>
+            <ul className="space-y-3">
+              {['Gaming Tools', 'Development', 'Applications', 'Security'].map(item => (
+                <li key={item}><a href="#" className="hover:text-cyber-primary transition-colors">{item}</a></li>
+              ))}
             </ul>
           </div>
+
           <div>
-            <h4 className="text-white font-bold mb-4">{t('footer.support')}</h4>
-            <ul className="space-y-2">
-              <li><a href="#" className="hover:text-cyber-primary">{t('footer.documentation')}</a></li>
-              <li><a href="#" className="hover:text-cyber-primary">{t('footer.statusPage')}</a></li>
-              <li><a href="#" className="hover:text-cyber-primary">{t('footer.contactUs')}</a></li>
+            <h4 className="text-white font-bold mb-6 text-lg">{t('footer.support')}</h4>
+            <ul className="space-y-3">
+              <li><a href="#" className="hover:text-cyber-primary transition-colors">Help Center</a></li>
+              <li><a href="#" className="hover:text-cyber-primary transition-colors">{t('footer.contactUs')}</a></li>
+              <li><a href="#" className="hover:text-cyber-primary transition-colors">Refund Policy</a></li>
+              <li><a href="#" className="hover:text-cyber-primary transition-colors">License Terms</a></li>
             </ul>
           </div>
+
           <div>
-            <h4 className="text-white font-bold mb-4">{t('footer.connect')}</h4>
-            <div className="flex gap-4">
-              <Github className="hover:text-white cursor-pointer" />
-              <Twitter className="hover:text-white cursor-pointer" />
-              <Linkedin className="hover:text-white cursor-pointer" />
+            <h4 className="text-white font-bold mb-6 text-lg">{t('footer.paymentMethods')}</h4>
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors">
+                  <CreditCard size={16} /> Cards
+                </button>
+                <button className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white hover:bg-white/10 transition-colors">
+                  <Box size={16} /> Crypto
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <a href="#" className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+                  <span className="font-bold text-lg">𝕏</span>
+                </a>
+                <a href="#" className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+                  <Linkedin size={18} />
+                </a>
+                <a href="#" className="w-10 h-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+                  <Play size={18} className="fill-current" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
-        <div className="text-center mt-12 pt-8 border-t border-white/5">
+
+        <div className="container mx-auto px-6 mt-16 pt-8 border-t border-white/5 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
           <p>{t('footer.copyright')}</p>
+          <div className="flex gap-6 text-xs">
+            <a href="#" className="hover:text-white">Privacy Policy</a>
+            <a href="#" className="hover:text-white">Terms of Service</a>
+            <a href="#" className="hover:text-white">Cookie Policy</a>
+          </div>
         </div>
       </footer>
 
