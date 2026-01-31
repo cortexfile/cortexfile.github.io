@@ -69,8 +69,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
     return (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
+            animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -10 }}
             className="group relative glass-panel rounded-2xl p-4 overflow-hidden flex flex-col h-full"
         >
