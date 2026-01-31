@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search, Star, Download, Shield, Lock, Zap, Code, Gamepad2, Wrench, Sparkles, ChevronDown, Check, X, Menu, CreditCard, Bitcoin, MessageCircle, Play, Eye, Heart, TrendingUp, Cpu, Monitor, Globe } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import { Product } from '../types';
@@ -9,9 +10,13 @@ import { useLanguage } from './components/LanguageContext'; // Restored Language
 // Extended Product type for UI-specific fields not in DB
 interface UIProduct extends Product {
   trending?: boolean;
+  downloads: number;
+  reviews: number;
+  rating: number;
 }
 
 const Store = () => {
+  const navigate = useNavigate();
   const { t, dir } = useLanguage(); // Use localized strings and direction
   const [cart, setCart] = useState<any[]>([]);
   const [showCart, setShowCart] = useState(false);
@@ -275,7 +280,7 @@ const Store = () => {
                   </span>
                 </div>
                 <button
-                  onClick={() => { setCheckoutStep(1); setShowCart(false); }}
+                  onClick={() => { setShowCart(false); navigate('/checkout'); }}
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 font-bold text-white hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
                 >
                   {t('cart.checkout')}

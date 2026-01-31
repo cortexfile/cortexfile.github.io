@@ -57,7 +57,7 @@ const App = () => {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/checkout" element={<StripeCheckout />} />
+                <Route path="/checkout" element={<Checkout />} />
                 <Route path="/contact" element={<Contact />} />
 
                 {/* User Routes - Protected by default via UserLayout logic or Auth Guard if needed */}
