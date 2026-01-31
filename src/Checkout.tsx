@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import { Button } from '../components/UI';
 import { ArrowLeft, CheckCircle, CreditCard, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from './components/LanguageContext';
 
 const Checkout = () => {
     const [cart, setCart] = useState<any[]>([]);
@@ -19,6 +20,7 @@ const Checkout = () => {
         zip: '',
     });
     const navigate = useNavigate();
+    const { t, dir } = useLanguage();
 
     useEffect(() => {
         const savedCart = localStorage.getItem('cortex_cart');
@@ -56,7 +58,7 @@ const Checkout = () => {
 
     if (completed) {
         return (
-            <div className="min-h-screen bg-cyber-black text-white flex items-center justify-center font-sans">
+            <div className="min-h-screen bg-cyber-black text-white flex items-center justify-center font-sans" dir={dir}>
                 <ThreeBackground />
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
@@ -66,12 +68,12 @@ const Checkout = () => {
                     <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                         <CheckCircle className="w-10 h-10 text-green-400" />
                     </div>
-                    <h1 className="text-3xl font-bold mb-4">Order Confirmed!</h1>
+                    <h1 className="text-3xl font-bold mb-4">{t('checkout.orderConfirmed')}</h1>
                     <p className="text-gray-400 mb-8">
-                        Thank you for your purchase. We have received your order and will process it shortly.
+                        {t('checkout.thankYou')}
                     </p>
                     <Link to="/">
-                        <Button className="w-full justify-center">Return to Store</Button>
+                        <Button className="w-full justify-center">{t('checkout.returnToStore')}</Button>
                     </Link>
                 </motion.div>
             </div>
@@ -79,40 +81,39 @@ const Checkout = () => {
     }
 
     return (
-        <div className="min-h-screen bg-cyber-black text-white font-sans overflow-x-hidden">
+        <div className="min-h-screen bg-cyber-black text-white font-sans overflow-x-hidden" dir={dir}>
             <ThreeBackground />
             <Navbar cartCount={cart.length} />
 
             <div className="container mx-auto px-6 pt-32 pb-20 relative z-10">
                 <Link to="/" className="inline-flex items-center text-gray-400 hover:text-white mb-8 transition-colors">
-                    <ArrowLeft size={20} className="mr-2" /> Back to Store
+                    <ArrowLeft size={20} className={dir === 'rtl' ? 'ml-2' : 'mr-2'} /> {t('checkout.backToStore')}
                 </Link>
 
                 <h1 className="text-4xl font-bold mb-8 flex items-center gap-3">
-                    <ShoppingBag className="text-cyber-primary" /> Checkout
+                    <ShoppingBag className="text-cyber-primary" /> {t('checkout.title')}
                 </h1>
 
                 {cart.length === 0 ? (
                     <div className="glass-panel p-12 text-center rounded-2xl border border-white/10">
-                        <p className="text-xl text-gray-400 mb-6">Your cart is empty.</p>
+                        <p className="text-xl text-gray-400 mb-6">{t('checkout.emptyCart')}</p>
                         <Link to="/">
-                            <Button>Browse Products</Button>
+                            <Button>{t('checkout.browseProducts')}</Button>
                         </Link>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                        {/* Form */}
                         <motion.div
                             initial={{ x: -20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             className="glass-panel p-8 rounded-2xl border border-white/10 h-fit"
                         >
                             <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                                <CreditCard size={20} /> Shipping & Payment
+                                <CreditCard size={20} /> {t('checkout.shippingPayment')}
                             </h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Full Name</label>
+                                    <label className="block text-sm text-gray-400 mb-1">{t('checkout.fullName')}</label>
                                     <input
                                         required
                                         type="text"
@@ -122,7 +123,7 @@ const Checkout = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Email Address</label>
+                                    <label className="block text-sm text-gray-400 mb-1">{t('checkout.emailAddress')}</label>
                                     <input
                                         required
                                         type="email"
@@ -132,7 +133,7 @@ const Checkout = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Address</label>
+                                    <label className="block text-sm text-gray-400 mb-1">{t('checkout.address')}</label>
                                     <input
                                         required
                                         type="text"
@@ -143,7 +144,7 @@ const Checkout = () => {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm text-gray-400 mb-1">City</label>
+                                        <label className="block text-sm text-gray-400 mb-1">{t('checkout.city')}</label>
                                         <input
                                             required
                                             type="text"
@@ -153,7 +154,7 @@ const Checkout = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm text-gray-400 mb-1">ZIP / Postal Code</label>
+                                        <label className="block text-sm text-gray-400 mb-1">{t('checkout.zip')}</label>
                                         <input
                                             required
                                             type="text"
@@ -166,23 +167,22 @@ const Checkout = () => {
 
                                 <div className="pt-6 border-t border-white/10 mt-6">
                                     <div className="flex justify-between items-center mb-6">
-                                        <span className="text-gray-400">Total Amount</span>
+                                        <span className="text-gray-400">{t('checkout.totalAmount')}</span>
                                         <span className="text-3xl font-bold text-cyber-primary">${total}</span>
                                     </div>
                                     <Button className="w-full justify-center py-4 text-lg" disabled={loading}>
-                                        {loading ? 'Processing...' : `Pay $${total}`}
+                                        {loading ? t('checkout.processing') : `${t('checkout.pay')} $${total}`}
                                     </Button>
                                 </div>
                             </form>
                         </motion.div>
 
-                        {/* Order Summary */}
                         <motion.div
                             initial={{ x: 20, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
                             className="glass-panel p-8 rounded-2xl border border-white/10 h-fit"
                         >
-                            <h2 className="text-2xl font-bold mb-6">Order Summary</h2>
+                            <h2 className="text-2xl font-bold mb-6">{t('checkout.orderSummary')}</h2>
                             <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                                 {cart.map((item, index) => (
                                     <div key={index} className="flex gap-4 items-center bg-white/5 p-3 rounded-lg">

@@ -14,15 +14,18 @@ import { Button, Badge, SectionTitle } from '../components/UI';
 // --- Sub-Components (Defined here for file constraint) ---
 
 import Navbar from './components/Navbar';
+import { useLanguage } from './components/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './components/Toast';
 
 // 2. Product Card
 import ProductCard from './components/ProductCard';
+import DebugPanel from './components/DebugPanel';
 
 // 3. Cart Drawer
 const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemove, onCheckout }: any) => {
   const total = cartItems.reduce((sum: number, item: CartItem) => sum + item.price * item.quantity, 0);
+  const { t, dir } = useLanguage();
 
   return (
     <AnimatePresence>
@@ -34,13 +37,14 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemove, on
             onClick={onClose}
           />
           <motion.div
-            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+            initial={{ x: dir === 'rtl' ? '-100%' : '100%' }} animate={{ x: 0 }} exit={{ x: dir === 'rtl' ? '-100%' : '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-cyber-black border-l border-white/10 z-50 flex flex-col shadow-2xl"
+            className={`fixed ${dir === 'rtl' ? 'left-0' : 'right-0'} top-0 h-full w-full max-w-md bg-cyber-black border-l border-white/10 z-50 flex flex-col shadow-2xl`}
+            dir={dir}
           >
             <div className="p-6 border-b border-white/10 flex justify-between items-center">
               <h2 className="text-xl font-bold flex items-center gap-2">
-                <ShoppingCart className="text-cyber-primary" /> Your Cart
+                <ShoppingCart className="text-cyber-primary" /> {t('cart.title')}
               </h2>
               <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full"><X size={20} /></button>
             </div>
@@ -49,8 +53,8 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemove, on
               {cartItems.length === 0 ? (
                 <div className="text-center py-20 text-gray-500">
                   <Box size={48} className="mx-auto mb-4 opacity-50" />
-                  <p>Your cart is empty.</p>
-                  <Button variant="outline" className="mt-4" onClick={onClose}>Continue Shopping</Button>
+                  <p>{t('cart.empty')}</p>
+                  <Button variant="outline" className="mt-4" onClick={onClose}>{t('cart.continue')}</Button>
                 </div>
               ) : (
                 cartItems.map((item: CartItem) => (
@@ -63,7 +67,7 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemove, on
                         <button onClick={() => onUpdateQuantity(item.id, -1)} className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center">-</button>
                         <span className="text-sm">{item.quantity}</span>
                         <button onClick={() => onUpdateQuantity(item.id, 1)} className="w-6 h-6 rounded bg-white/10 hover:bg-white/20 flex items-center justify-center">+</button>
-                        <button onClick={() => onRemove(item.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Remove</button>
+                        <button onClick={() => onRemove(item.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">{t('cart.remove')}</button>
                       </div>
                     </div>
                   </div>
@@ -73,11 +77,11 @@ const CartDrawer = ({ isOpen, onClose, cartItems, onUpdateQuantity, onRemove, on
 
             <div className="p-6 border-t border-white/10 bg-cyber-dark">
               <div className="flex justify-between mb-4 text-lg font-bold">
-                <span>Total</span>
+                <span>{t('cart.total')}</span>
                 <span className="text-cyber-neon font-mono">${total.toFixed(2)}</span>
               </div>
               <Button className="w-full" disabled={cartItems.length === 0} onClick={onCheckout}>
-                Proceed to Checkout
+                {t('cart.checkout')}
               </Button>
             </div>
           </motion.div>
@@ -99,6 +103,7 @@ const Hero = ({ settings, isLoading }: { settings: SiteSettings | null; isLoadin
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
+  const { t } = useLanguage();
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
@@ -110,28 +115,28 @@ const Hero = ({ settings, isLoading }: { settings: SiteSettings | null; isLoadin
         <motion.div style={{ y: y1 }} className="space-y-6">
 
           <h1 className="text-5xl md:text-7xl font-extrabold leading-tight tracking-tight">
-            {(settings?.hero_title || 'Execute Your Potential').split(' ').slice(0, -1).join(' ')} <br />
+            {t('hero.title').split(' ').slice(0, -1).join(' ')} <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon via-white to-cyber-primary animate-pulse-slow">
-              {(settings?.hero_title || 'Execute Your Potential').split(' ').slice(-1)[0]}
+              {t('hero.title').split(' ').slice(-1)[0]}
             </span>
           </h1>
           <p className="text-lg text-gray-400 max-w-lg leading-relaxed">
-            {settings?.hero_subtitle || 'The world\'s most advanced marketplace for high-performance EXE tools, System utilities, and developer assets. Optimized for the future.'}
+            {t('hero.subtitle')}
           </p>
           <div className="flex gap-4">
             <Button size="lg" onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}>
-              {settings?.hero_button_text || 'Explore Store'} <ChevronRight className="ml-2 w-5 h-5" />
+              {t('hero.explore')} <ChevronRight className="ml-2 w-5 h-5" />
             </Button>
             <Button size="lg" variant="outline">
-              View Demo
+              {t('hero.demo')}
             </Button>
           </div>
 
           <div className="flex items-center gap-8 pt-8 border-t border-white/5">
             {[
-              { icon: Zap, label: "Instant Delivery" },
-              { icon: Shield, label: "Secure Guard" },
-              { icon: Cpu, label: "High Performance" }
+              { icon: Zap, label: t('hero.instantDelivery') },
+              { icon: Shield, label: t('hero.secureGuard') },
+              { icon: Cpu, label: t('hero.highPerformance') }
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-2 text-gray-400">
                 <Icon size={20} className="text-cyber-primary" />
@@ -161,7 +166,7 @@ const Hero = ({ settings, isLoading }: { settings: SiteSettings | null; isLoadin
             <div className="absolute top-10 right-10 p-4 glass-panel rounded-xl animate-float">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-xs font-mono text-green-400">SYSTEM OPTIMAL</span>
+                <span className="text-xs font-mono text-green-400">{t('hero.systemOptimal')}</span>
               </div>
               <div className="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
                 <div className="h-full w-3/4 bg-cyber-neon" />
@@ -273,6 +278,7 @@ const CheckoutModal = ({ isOpen, onClose, cartItems, onComplete }: any) => {
 const Store = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { t } = useLanguage();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -366,6 +372,7 @@ const Store = () => {
 
   return (
     <div className="min-h-screen font-sans text-white relative selection:bg-cyber-primary selection:text-white">
+      <DebugPanel />
       <ThreeBackground />
 
       <Navbar
@@ -379,19 +386,19 @@ const Store = () => {
         {/* Featured / Products Section */}
         <section id="products" className="container mx-auto px-6">
           <SectionTitle
-            title={searchQuery ? `Results: "${searchQuery}"` : "Digital Arsenal"}
-            subtitle={searchQuery ? "Found products matching your search" : "Premium Tools"}
+            title={searchQuery ? `${t('store.resultsFor')} "${searchQuery}"` : t('store.digitalArsenal')}
+            subtitle={searchQuery ? t('store.foundProducts') : t('store.premiumTools')}
           />
 
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-12">
             <div className="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto">
-              {categories.map(cat => (
+              {[t('store.all'), ...Array.from(new Set(products.map(p => p.category)))].map(cat => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${activeCategory === cat ? 'bg-cyber-primary text-white shadow-lg' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
                 >
-                  {cat}
+                  {cat === 'All' ? t('store.all') : t(`categories.${cat.toLowerCase()}`)}
                 </button>
               ))}
             </div>
@@ -400,7 +407,7 @@ const Store = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
               <input
                 type="text"
-                placeholder="Search tools..."
+                placeholder={t('store.searchTools')}
                 className="w-full bg-black/20 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm focus:border-cyber-primary focus:outline-none transition-colors"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -424,9 +431,9 @@ const Store = () => {
 
             <div className="grid md:grid-cols-3 gap-12 text-center relative z-10">
               {[
-                { title: 'Global CDN', desc: 'Downloads served from 120+ edge locations for max speed.', icon: Globe },
-                { title: 'Auto-Updates', desc: 'Software stays current with silent background patching.', icon: Download },
-                { title: 'Cloud Sync', desc: 'Your settings and licenses sync across all your devices.', icon: Monitor },
+                { title: t('features.globalCdn'), desc: t('features.globalCdnDesc'), icon: Globe },
+                { title: t('features.autoUpdates'), desc: t('features.autoUpdatesDesc'), icon: Download },
+                { title: t('features.cloudSync'), desc: t('features.cloudSyncDesc'), icon: Monitor },
               ].map((f, i) => (
                 <motion.div
                   key={i}
@@ -448,7 +455,7 @@ const Store = () => {
 
         {/* Testimonials */}
         <section id="testimonials" className="container mx-auto px-6">
-          <SectionTitle title="User Protocols" subtitle="Reviews" />
+          <SectionTitle title={t('testimonials.title')} subtitle={t('testimonials.subtitle')} />
           <div className="grid md:grid-cols-3 gap-8">
             {TESTIMONIALS.map((t, i) => (
               <div key={t.id} className="bg-cyber-card border border-white/5 p-8 rounded-2xl relative">
@@ -473,11 +480,11 @@ const Store = () => {
           <div className="bg-gradient-to-r from-cyber-primary to-cyber-accent rounded-3xl p-12 text-center relative overflow-hidden">
             <div className="absolute inset-0 bg-black/20" />
             <div className="relative z-10 max-w-2xl mx-auto space-y-6">
-              <h2 className="text-3xl font-bold">Join the Developer Network</h2>
-              <p className="text-white/80">Get exclusive access to beta releases and discount codes dropped directly to your inbox.</p>
+              <h2 className="text-3xl font-bold">{t('newsletter.title')}</h2>
+              <p className="text-white/80">{t('newsletter.desc')}</p>
               <div className="flex gap-4 max-w-md mx-auto">
-                <input type="email" placeholder="enter_email_address.exe" className="flex-1 px-4 py-3 rounded-lg bg-black/30 border border-white/20 text-white placeholder-white/50 focus:outline-none" />
-                <button className="bg-white text-cyber-primary font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">Subscribe</button>
+                <input type="email" placeholder={t('newsletter.placeholder')} className="flex-1 px-4 py-3 rounded-lg bg-black/30 border border-white/20 text-white placeholder-white/50 focus:outline-none" />
+                <button className="bg-white text-cyber-primary font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">{t('newsletter.subscribe')}</button>
               </div>
             </div>
           </div>
@@ -488,26 +495,26 @@ const Store = () => {
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 text-sm text-gray-500">
           <div className="space-y-4">
             <div className="text-2xl font-bold text-white">Cortex<span className="text-cyber-primary">File</span></div>
-            <p>Advanced digital distribution platform designed for the next generation of creators.</p>
+            <p>{t('footer.desc')}</p>
           </div>
           <div>
-            <h4 className="text-white font-bold mb-4">Platform</h4>
+            <h4 className="text-white font-bold mb-4">{t('footer.platform')}</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-cyber-primary">Browse All</a></li>
-              <li><a href="#" className="hover:text-cyber-primary">Sell Software</a></li>
-              <li><a href="#" className="hover:text-cyber-primary">API Access</a></li>
+              <li><a href="#" className="hover:text-cyber-primary">{t('footer.browseAll')}</a></li>
+              <li><a href="#" className="hover:text-cyber-primary">{t('footer.sellSoftware')}</a></li>
+              <li><a href="#" className="hover:text-cyber-primary">{t('footer.apiAccess')}</a></li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-bold mb-4">Support</h4>
+            <h4 className="text-white font-bold mb-4">{t('footer.support')}</h4>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:text-cyber-primary">Documentation</a></li>
-              <li><a href="#" className="hover:text-cyber-primary">Status Page</a></li>
-              <li><a href="#" className="hover:text-cyber-primary">Contact Us</a></li>
+              <li><a href="#" className="hover:text-cyber-primary">{t('footer.documentation')}</a></li>
+              <li><a href="#" className="hover:text-cyber-primary">{t('footer.statusPage')}</a></li>
+              <li><a href="#" className="hover:text-cyber-primary">{t('footer.contactUs')}</a></li>
             </ul>
           </div>
           <div>
-            <h4 className="text-white font-bold mb-4">Connect</h4>
+            <h4 className="text-white font-bold mb-4">{t('footer.connect')}</h4>
             <div className="flex gap-4">
               <Github className="hover:text-white cursor-pointer" />
               <Twitter className="hover:text-white cursor-pointer" />
@@ -516,7 +523,7 @@ const Store = () => {
           </div>
         </div>
         <div className="text-center mt-12 pt-8 border-t border-white/5">
-          <p>© 2026 CortexFile Inc. All systems operational.</p>
+          <p>{t('footer.copyright')}</p>
         </div>
       </footer>
 

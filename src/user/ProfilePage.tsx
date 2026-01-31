@@ -3,10 +3,12 @@ import { supabase } from '../supabaseClient';
 import { Button } from '../../components/UI';
 import { User, Mail, Shield, UserCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../components/LanguageContext';
 
 const ProfilePage = () => {
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const { t, dir } = useLanguage();
 
     useEffect(() => {
         const getUser = async () => {
@@ -17,16 +19,15 @@ const ProfilePage = () => {
         getUser();
     }, []);
 
-    if (loading) return <div className="text-white">Loading...</div>;
+    if (loading) return <div className="text-white">{t('profile.loading')}</div>;
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8" dir={dir}>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                My Profile
+                {t('profile.title')}
             </h1>
 
             <div className="grid md:grid-cols-3 gap-8">
-                {/* Identity Card */}
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -39,14 +40,13 @@ const ProfilePage = () => {
                         </div>
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-white mb-1">User Account</h2>
+                        <h2 className="text-xl font-bold text-white mb-1">{t('profile.userAccount')}</h2>
                         <span className="inline-block px-3 py-1 rounded-full bg-cyber-primary/10 border border-cyber-primary/20 text-cyber-primary text-xs">
-                            Active Member
+                            {t('profile.activeMember')}
                         </span>
                     </div>
                 </motion.div>
 
-                {/* Details Form */}
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -55,34 +55,34 @@ const ProfilePage = () => {
                 >
                     <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                         <Shield size={20} className="text-cyber-primary" />
-                        Account Security
+                        {t('profile.accountSecurity')}
                     </h3>
 
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-sm text-gray-400 mb-2">Email Address</label>
+                            <label className="block text-sm text-gray-400 mb-2">{t('profile.emailAddress')}</label>
                             <div className="flex items-center gap-3 bg-black/20 p-4 rounded-xl border border-white/5">
                                 <Mail size={18} className="text-gray-500" />
                                 <span className="text-white font-mono">{user?.email}</span>
                             </div>
                             <p className="text-xs text-gray-500 mt-2">
-                                Your email is managed via Supabase Auth. To change it, please contact support.
+                                {t('profile.emailNote')}
                             </p>
                         </div>
 
                         <div>
-                            <label className="block text-sm text-gray-400 mb-2">Password</label>
+                            <label className="block text-sm text-gray-400 mb-2">{t('profile.password')}</label>
                             <div className="flex items-center justify-between bg-black/20 p-4 rounded-xl border border-white/5">
                                 <span className="text-gray-500">••••••••••••</span>
                                 <Button size="sm" variant="outline" onClick={() => alert('Password reset link sent to your email!')}>
-                                    Reset Password
+                                    {t('profile.resetPassword')}
                                 </Button>
                             </div>
                         </div>
 
                         <div className="pt-4 border-t border-white/5">
                             <p className="text-sm text-gray-400">
-                                User ID: <span className="font-mono text-xs text-gray-600">{user?.id}</span>
+                                {t('profile.userId')}: <span className="font-mono text-xs text-gray-600">{user?.id}</span>
                             </p>
                         </div>
                     </div>

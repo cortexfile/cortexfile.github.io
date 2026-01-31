@@ -22,26 +22,46 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         document.documentElement.dir = dir;
         document.documentElement.lang = language;
 
-        // Switch font based on language
+        // Switch font based on language - Tajawal for Arabic
         if (language === 'ar') {
-            document.body.classList.add('font-arabic');
+            document.body.style.fontFamily = "'Tajawal', sans-serif";
         } else {
-            document.body.classList.remove('font-arabic');
+            document.body.style.fontFamily = "'Inter', sans-serif";
         }
     }, [language, dir]);
 
     const t = (path: string) => {
         const keys = path.split('.');
-        let value: any = translations[language];
 
-        for (const key of keys) {
-            if (value && value[key]) {
-                value = value[key];
-            } else {
-                return path; // Fallback to key if not found
-            }
+        // Debug: Check if translations object is loaded
+        if (!translations) {
+            console.error('Translations object is undefined!');
+            return path;
         }
-        return value as string;
+
+        // Try current language
+        let value: any = translations[language];
+        for (const key of keys) {
+            value = value?.[key];
+            if (!value) break;
+        }
+
+        // If found, return it
+        if (value && typeof value === 'string') return value;
+
+        // Debug: Log missing key
+        if (language === 'ar') {
+            console.warn(`[Missing Translation] Path: "${path}", Language: "${language}"`);
+        }
+
+        // Fallback to English
+        value = translations['en'];
+        for (const key of keys) {
+            value = value?.[key];
+            if (!value) break;
+        }
+
+        return (value as string) || path;
     };
 
     return (

@@ -4,8 +4,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/UI';
 import { Shield, Lock } from 'lucide-react';
 import ThreeBackground from '../components/ThreeBackground';
+import { useLanguage } from './components/LanguageContext';
 
 const Login = () => {
+    const { t } = useLanguage();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -38,8 +40,8 @@ const Login = () => {
                     <div className="w-16 h-16 bg-cyber-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Shield className="w-8 h-8 text-cyber-primary" />
                     </div>
-                    <h1 className="text-2xl font-bold">Admin Portal</h1>
-                    <p className="text-gray-400 text-sm">Restricted Access Only</p>
+                    <h1 className="text-2xl font-bold">{t('login.title')}</h1>
+                    <p className="text-gray-400 text-sm">{t('login.restricted')}</p>
                 </div>
 
                 {error && (
@@ -50,22 +52,22 @@ const Login = () => {
 
                 <form onSubmit={handleLogin} className="space-y-4">
                     <div>
-                        <label className="block text-sm text-gray-400 mb-1">Email</label>
+                        <label className="block text-sm text-gray-400 mb-1">{t('login.email')}</label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white focus:border-cyber-primary focus:outline-none"
-                            placeholder="admin@cortexfile.com"
+                            placeholder={t('login.placeholder')}
                         />
                     </div>
                     <div className="flex justify-end">
                         <Link to="/forgot-password" className="text-xs text-cyber-primary hover:text-cyber-accent transition-colors">
-                            Forgot Password?
+                            {t('login.forgot')}
                         </Link>
                     </div>
                     <div>
-                        <label className="block text-sm text-gray-400 mb-1">Password</label>
+                        <label className="block text-sm text-gray-400 mb-1">{t('login.password')}</label>
                         <input
                             type="password"
                             value={password}
@@ -75,7 +77,7 @@ const Login = () => {
                         />
                     </div>
                     <Button className="w-full justify-center" disabled={loading}>
-                        {loading ? 'Authenticating...' : 'Enter System'} <Lock size={16} className="ml-2" />
+                        {loading ? t('login.auth') : t('login.enter')} <Lock size={16} className="ml-2" />
                     </Button>
                 </form>
             </div>

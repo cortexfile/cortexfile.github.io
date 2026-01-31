@@ -4,6 +4,7 @@ import { Button } from '../components/UI';
 import { Lock, ArrowLeft, CheckCircle } from 'lucide-react';
 import ThreeBackground from '../components/ThreeBackground';
 import { Link, useNavigate } from 'react-router-dom';
+import { useLanguage } from './components/LanguageContext';
 
 const ResetPassword = () => {
     const [password, setPassword] = useState('');
@@ -11,15 +12,15 @@ const ResetPassword = () => {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { t, dir } = useLanguage();
 
     useEffect(() => {
-        // Verify we have a session (user clicked email link)
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (!session) {
-                setError('Invalid or expired reset link.');
+                setError(t('resetPassword.invalidLink'));
             }
         });
-    }, []);
+    }, [t]);
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,22 +32,22 @@ const ResetPassword = () => {
         if (error) {
             setError(error.message);
         } else {
-            setMessage('Password updated successfully! Redirecting to login...');
+            setMessage(t('resetPassword.success'));
             setTimeout(() => navigate('/login'), 2000);
         }
         setLoading(false);
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative font-sans text-white">
+        <div className="min-h-screen flex items-center justify-center relative font-sans text-white" dir={dir}>
             <ThreeBackground />
             <div className="relative z-10 w-full max-w-md p-8 bg-cyber-card/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
                 <div className="text-center mb-8">
                     <div className="w-16 h-16 bg-cyber-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Lock className="w-8 h-8 text-cyber-primary" />
                     </div>
-                    <h1 className="text-2xl font-bold">New Password</h1>
-                    <p className="text-gray-400 text-sm mt-2">Enter your new secure password.</p>
+                    <h1 className="text-2xl font-bold">{t('resetPassword.title')}</h1>
+                    <p className="text-gray-400 text-sm mt-2">{t('resetPassword.subtitle')}</p>
                 </div>
 
                 {message && (
@@ -65,7 +66,7 @@ const ResetPassword = () => {
                 {!message && (
                     <form onSubmit={handleUpdate} className="space-y-4">
                         <div>
-                            <label className="block text-sm text-gray-400 mb-1">New Password</label>
+                            <label className="block text-sm text-gray-400 mb-1">{t('resetPassword.newPassword')}</label>
                             <input
                                 type="password"
                                 required
@@ -77,13 +78,13 @@ const ResetPassword = () => {
                             />
                         </div>
                         <Button className="w-full justify-center" disabled={loading}>
-                            {loading ? 'Updating...' : 'Update Password'}
+                            {loading ? t('resetPassword.updating') : t('resetPassword.updatePassword')}
                         </Button>
                     </form>
                 )}
                 <div className="mt-6 text-center">
                     <Link to="/login" className="text-gray-400 hover:text-white text-sm transition-colors">
-                        Back to Login
+                        {t('resetPassword.backToLogin')}
                     </Link>
                 </div>
             </div>

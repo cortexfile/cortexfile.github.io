@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Package, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '../components/LanguageContext';
 
 const UserOrdersPage = () => {
     const [orders, setOrders] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+    const { t, dir } = useLanguage();
 
     useEffect(() => {
         fetchOrders();
@@ -35,18 +37,18 @@ const UserOrdersPage = () => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6" dir={dir}>
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-                My Orders
+                {t('orders.title')}
             </h1>
 
             {loading ? (
-                <div className="text-center py-12 text-gray-500">Loading your history...</div>
+                <div className="text-center py-12 text-gray-500">{t('orders.loading')}</div>
             ) : orders.length === 0 ? (
                 <div className="text-center py-12 bg-white/5 rounded-2xl border border-white/10">
                     <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-bold text-white mb-2">No orders found</h3>
-                    <p className="text-gray-400">You haven't purchased any tools yet.</p>
+                    <h3 className="text-xl font-bold text-white mb-2">{t('orders.noOrders')}</h3>
+                    <p className="text-gray-400">{t('orders.noOrdersDesc')}</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -68,7 +70,7 @@ const UserOrdersPage = () => {
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-white flex items-center gap-3">
-                                            Order #{order.id.slice(0, 8)}
+                                            {t('orders.order')} #{order.id.slice(0, 8)}
                                             <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase border ${getStatusColor(order.status)}`}>
                                                 {order.status}
                                             </span>
@@ -81,8 +83,8 @@ const UserOrdersPage = () => {
                                 </div>
 
                                 <div className="flex items-center gap-6 mt-4 md:mt-0 w-full md:w-auto justify-between">
-                                    <div className="text-right">
-                                        <span className="block text-xs text-gray-500">Total Amount</span>
+                                    <div className={dir === 'rtl' ? 'text-left' : 'text-right'}>
+                                        <span className="block text-xs text-gray-500">{t('orders.totalAmount')}</span>
                                         <span className="text-xl font-bold text-cyber-primary">${order.total}</span>
                                     </div>
                                     {expandedOrder === order.id ? <ChevronUp className="text-gray-400" /> : <ChevronDown className="text-gray-400" />}
@@ -98,7 +100,7 @@ const UserOrdersPage = () => {
                                         className="overflow-hidden bg-black/20 border-t border-white/5"
                                     >
                                         <div className="p-6 space-y-4">
-                                            <h4 className="text-sm font-bold text-gray-300">Purchased Items</h4>
+                                            <h4 className="text-sm font-bold text-gray-300">{t('orders.purchasedItems')}</h4>
                                             <div className="space-y-3">
                                                 {order.products?.map((item: any, idx: number) => (
                                                     <div key={idx} className="flex items-center justify-between bg-white/5 p-3 rounded-lg">
@@ -110,10 +112,10 @@ const UserOrdersPage = () => {
                                                     </div>
                                                 ))}
                                             </div>
-                                            <div className="pt-4 flex justify-end">
+                                            <div className={`pt-4 flex ${dir === 'rtl' ? 'justify-start' : 'justify-end'}`}>
                                                 {order.status === 'completed' && (
                                                     <button className="text-sm text-cyber-primary hover:text-cyber-neon hover:underline">
-                                                        Download Invoice
+                                                        {t('orders.downloadInvoice')}
                                                     </button>
                                                 )}
                                             </div>

@@ -19,6 +19,9 @@
     }(window.location))
   </script>
   <!-- End Single Page Apps for GitHub Pages -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&family=Tajawal:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -39,6 +42,7 @@
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
             mono: ['Fira Code', 'monospace'],
+            arabic: ['Tajawal', 'sans-serif'],
           },
           animation: {
             'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -60,11 +64,14 @@
       },
     }
   </script>
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;600&family=Cairo:wght@400;600;800&display=swap"
-  rel="stylesheet">
+
   <style>
-    .font-arabic {
-      font-family: 'Cairo', sans-serif !important;
+    /* Tajawal font for Arabic */
+    .font-arabic,
+    html[dir="rtl"],
+    html[dir="rtl"] body,
+    html[dir="rtl"] * {
+      font-family: 'Tajawal', sans-serif !important;
     }
 
     body {
@@ -201,12 +208,11 @@
   }
 }
 </script>
-  <link rel="stylesheet" href="/index.css">
+  <!-- CSS is handled by Tailwind CDN -->
 </head>
 
 <body>
   <div id="root"></div>
-  <script type="module" src="./index.tsx"></script>
   <script type="module" src="/index.tsx"></script>
 </body>
 

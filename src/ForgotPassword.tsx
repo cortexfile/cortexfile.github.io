@@ -4,12 +4,14 @@ import { Button } from '../components/UI';
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import ThreeBackground from '../components/ThreeBackground';
 import { Link } from 'react-router-dom';
+import { useLanguage } from './components/LanguageContext';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const { t, dir } = useLanguage();
 
     const handleReset = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,18 +26,18 @@ const ForgotPassword = () => {
         if (error) {
             setError(error.message);
         } else {
-            setMessage('Check your email for the password reset link.');
+            setMessage(t('forgotPassword.checkEmail'));
         }
         setLoading(false);
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative font-sans text-white">
+        <div className="min-h-screen flex items-center justify-center relative font-sans text-white" dir={dir}>
             <ThreeBackground />
             <div className="relative z-10 w-full max-w-md p-8 bg-cyber-card/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl">
                 <div className="mb-6">
                     <Link to="/login" className="text-gray-400 hover:text-white flex items-center gap-2 text-sm transition-colors">
-                        <ArrowLeft size={16} /> Back to Login
+                        <ArrowLeft size={16} /> {t('forgotPassword.backToLogin')}
                     </Link>
                 </div>
 
@@ -43,8 +45,8 @@ const ForgotPassword = () => {
                     <div className="w-16 h-16 bg-cyber-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Mail className="w-8 h-8 text-cyber-primary" />
                     </div>
-                    <h1 className="text-2xl font-bold">Reset Password</h1>
-                    <p className="text-gray-400 text-sm mt-2">Enter your email to receive a recovery link.</p>
+                    <h1 className="text-2xl font-bold">{t('forgotPassword.title')}</h1>
+                    <p className="text-gray-400 text-sm mt-2">{t('forgotPassword.subtitle')}</p>
                 </div>
 
                 {message && (
@@ -62,7 +64,7 @@ const ForgotPassword = () => {
 
                 <form onSubmit={handleReset} className="space-y-4">
                     <div>
-                        <label className="block text-sm text-gray-400 mb-1">Email Address</label>
+                        <label className="block text-sm text-gray-400 mb-1">{t('forgotPassword.emailAddress')}</label>
                         <input
                             type="email"
                             required
@@ -73,7 +75,7 @@ const ForgotPassword = () => {
                         />
                     </div>
                     <Button className="w-full justify-center" disabled={loading}>
-                        {loading ? 'Sending Link...' : 'Send Reset Link'}
+                        {loading ? t('forgotPassword.sending') : t('forgotPassword.sendLink')}
                     </Button>
                 </form>
             </div>

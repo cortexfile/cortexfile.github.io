@@ -6,6 +6,7 @@ import { Button, Badge } from '../../components/UI';
 import { Product } from '../../types';
 import { supabase } from '../supabaseClient';
 import { useToast } from './Toast';
+import { useLanguage } from './LanguageContext';
 
 interface ProductCardProps {
     product: Product;
@@ -15,6 +16,7 @@ interface ProductCardProps {
 const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
     const navigate = useNavigate();
     const { showToast } = useToast();
+    const { t } = useLanguage();
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -78,7 +80,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             <div className="relative h-48 rounded-xl overflow-hidden mb-4 bg-cyber-dark">
                 <img src={product.image} alt={product.name} className="w-full h-full object-contain p-2 transition-transform duration-700 group-hover:scale-110" />
                 <div className="absolute top-2 right-2 flex gap-2">
-                    <Badge>{product.category}</Badge>
+                    <Badge>{t(`categories.${product.category.toLowerCase()}`)}</Badge>
                 </div>
                 <div className="absolute top-2 left-2 z-20">
                     <button
@@ -91,7 +93,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
                 </div>
 
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-                    <Button size="sm" variant="outline" onClick={() => navigate(`/product/${product.id}`)}>View Details</Button>
+                    <Button size="sm" variant="outline" onClick={() => navigate(`/product/${product.id}`)}>{t('store.viewDetails')}</Button>
                 </div>
             </div>
 
@@ -111,7 +113,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
                         ${product.price === 0 ? 'FREE' : product.price}
                     </span>
                     <Button size="sm" onClick={() => onAddToCart(product)}>
-                        Add to Cart
+                        {t('store.addToCart')}
                     </Button>
                 </div>
             </div>
