@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { ShoppingCart, Search, Star, Download, Shield, Lock, Zap, Code, Gamepad2, Wrench, Sparkles, ChevronDown, Check, X, Menu, CreditCard, Bitcoin, MessageCircle, Play, Eye, Heart, TrendingUp } from 'lucide-react';
-import * as THREE from 'three';
+import { ShoppingCart, Search, Star, Download, Shield, Lock, Zap, Code, Gamepad2, Wrench, Sparkles, ChevronDown, Check, X, Menu, CreditCard, Bitcoin, MessageCircle, Play, Eye, Heart, TrendingUp, Cpu, Monitor, Globe } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import { Product } from '../types';
+import Navbar from './components/Navbar'; // Restored Navbar
+import ThreeBackground from './components/ThreeBackground'; // New isolated component
+import { useLanguage } from './components/LanguageContext'; // Restored Language Context
 
 // Extended Product type for UI-specific fields not in DB
 interface UIProduct extends Product {
@@ -10,6 +12,7 @@ interface UIProduct extends Product {
 }
 
 const Store = () => {
+  const { t, dir } = useLanguage(); // Use localized strings and direction
   const [cart, setCart] = useState<any[]>([]);
   const [showCart, setShowCart] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,18 +28,25 @@ const Store = () => {
   // Real data state
   const [products, setProducts] = useState<UIProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [webGLAvailable, setWebGLAvailable] = useState(true);
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const heroCanvasRef = useRef<HTMLCanvasElement>(null);
+  // Check WebGL availability once
+  useEffect(() => {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
+        setWebGLAvailable(false);
+      }
+    } catch (e) {
+      setWebGLAvailable(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchProducts();
-
-    // Load cart
     const savedCart = localStorage.getItem('cortex_cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
+    if (savedCart) setCart(JSON.parse(savedCart));
   }, []);
 
   useEffect(() => {
@@ -51,14 +61,10 @@ const Store = () => {
       if (error) throw error;
 
       if (data) {
-        // Map DB data to UI format
         const mappedProducts: UIProduct[] = data.map(p => ({
           ...p,
-          // Generate valid features array if null
           features: p.features || ['Premium Feature', '24/7 Support', 'Instant Download'],
-          // Randomize trending for demo variation
           trending: Math.random() > 0.7,
-          // Ensure rating has value
           rating: p.rating || 5.0,
           reviews: p.reviews || 0,
           downloads: p.downloads || 0
@@ -73,12 +79,13 @@ const Store = () => {
   };
 
   const categories = [
-    { id: 'all', name: 'All Products', icon: Sparkles, color: 'from-purple-500 to-pink-500' },
-    { id: 'gaming', name: 'Gaming', icon: Gamepad2, color: 'from-red-500 to-orange-500' }, // Changed 'games' to 'gaming' to match logic usually, but let's map it
-    { id: 'utility', name: 'Tools', icon: Wrench, color: 'from-blue-500 to-cyan-500' },
-    { id: 'apps', name: 'Applications', icon: Code, color: 'from-green-500 to-emerald-500' }
+    { id: 'all', name: t('store.all'), icon: Sparkles, color: 'from-purple-500 to-pink-500' },
+    { id: 'gaming', name: t('categories.gaming'), icon: Gamepad2, color: 'from-red-500 to-orange-500' },
+    { id: 'utility', name: t('categories.utility'), icon: Wrench, color: 'from-blue-500 to-cyan-500' },
+    { id: 'apps', name: t('categories.design'), icon: Code, color: 'from-green-500 to-emerald-500' }
   ];
 
+  // Note: Testimonials and FAQs should ideally come from translation files or DB too
   const testimonials = [
     {
       name: 'Alex Chen',
@@ -103,143 +110,9 @@ const Store = () => {
     }
   ];
 
-  const faqs = [
-    {
-      question: 'How do I receive my software after purchase?',
-      answer: 'Instantly! After payment confirmation, you\'ll receive a download link and license key via email within 60 seconds.'
-    },
-    {
-      question: 'What payment methods do you accept?',
-      answer: 'We accept all major credit cards, PayPal, cryptocurrency (Bitcoin, Ethereum), and wire transfers for enterprise orders.'
-    },
-    {
-      question: 'Is there a refund policy?',
-      answer: 'Yes! We offer a 30-day money-back guarantee. If you\'re not satisfied, contact support for a full refund.'
-    },
-    {
-      question: 'Can I use the software on multiple devices?',
-      answer: 'Most licenses allow installation on up to 3 devices. Enterprise licenses offer unlimited installations.'
-    },
-    {
-      question: 'Do you offer technical support?',
-      answer: 'Absolutely! 24/7 priority support via email, live chat, and community forums for all customers.'
-    }
-  ];
+  // Fallback static faqs (mock) if not in language file, using simple logic or restoring from t()
+  const faqs = [1, 2, 3, 4, 5]; // Using IDs to map to t(`faq.q${i}`)
 
-  // Three.js particle background
-  useEffect(() => {
-    if (!canvasRef.current) return;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, alpha: true });
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    camera.position.z = 5;
-
-    // Create particles
-    const particlesGeometry = new THREE.BufferGeometry();
-    const particlesCount = 3000;
-    const posArray = new Float32Array(particlesCount * 3);
-
-    for (let i = 0; i < particlesCount * 3; i++) {
-      posArray[i] = (Math.random() - 0.5) * 10;
-    }
-
-    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    const particlesMaterial = new THREE.PointsMaterial({
-      size: 0.005,
-      color: darkMode ? 0x8b5cf6 : 0x3b82f6,
-      transparent: true,
-      opacity: 0.8
-    });
-
-    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
-    scene.add(particlesMesh);
-
-    let mouseX = 0;
-    let mouseY = 0;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-
-      particlesMesh.rotation.y += 0.0005;
-      particlesMesh.rotation.x = mouseY * 0.00005;
-      particlesMesh.rotation.y = mouseX * 0.00005;
-
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      document.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [darkMode]);
-
-  // Hero 3D animation
-  useEffect(() => {
-    if (!heroCanvasRef.current) return;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 800 / 400, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas: heroCanvasRef.current, alpha: true, antialias: true });
-
-    renderer.setSize(800, 400);
-    camera.position.z = 5;
-
-    // Create geometric shapes
-    const geometry = new THREE.TorusKnotGeometry(1.5, 0.4, 100, 16);
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x8b5cf6,
-      metalness: 0.7,
-      roughness: 0.2,
-      wireframe: false
-    });
-    const torusKnot = new THREE.Mesh(geometry, material);
-    scene.add(torusKnot);
-
-    // Lighting
-    const light = new THREE.PointLight(0xffffff, 1, 100);
-    light.position.set(5, 5, 5);
-    scene.add(light);
-
-    const ambientLight = new THREE.AmbientLight(0x404040);
-    scene.add(ambientLight);
-
-    const animate = () => {
-      requestAnimationFrame(animate);
-
-      torusKnot.rotation.x += 0.01;
-      torusKnot.rotation.y += 0.01;
-
-      renderer.render(scene, camera);
-    };
-
-    animate();
-
-    return () => {
-      renderer.dispose();
-    };
-  }, []);
-
-  // Testimonial carousel auto-rotate
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
@@ -277,12 +150,6 @@ const Store = () => {
 
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
-      // Map DB category to Filter ID
-      // Utility -> utility
-      // Gaming -> gaming
-      // Design -> apps (approximate mapping)
-      // Security -> utility (grouping security under tools)
-
       let productCat = 'other';
       if (product.category === 'Utility' || product.category === 'Security') productCat = 'utility';
       if (product.category === 'Gaming') productCat = 'gaming';
@@ -305,93 +172,40 @@ const Store = () => {
   };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} transition-colors duration-500 overflow-hidden relative`}>
-      {/* Animated particle background */}
-      <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
+    <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} transition-colors duration-500 overflow-hidden relative`} dir={dir}>
+
+      {/* Background Logic */}
+      {webGLAvailable ? (
+        <ThreeBackground darkMode={darkMode} />
+      ) : (
+        <div className={`fixed inset-0 pointer-events-none z-0 bg-gradient-to-br ${darkMode ? 'from-gray-900 via-purple-900/20 to-gray-900' : 'from-gray-50 via-purple-100 to-white'} animate-pulse-slow`}>
+          {/* CSS-only decorative blobs as fallback */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-blob" />
+          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-blob animation-delay-2000" />
+          <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-blob animation-delay-4000" />
+        </div>
+      )}
 
       {/* Main content */}
       <div className="relative z-10">
-        {/* Navigation */}
-        <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-opacity-80" style={{
-          background: darkMode ? 'rgba(17, 24, 39, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-          borderBottom: '1px solid rgba(139, 92, 246, 0.2)'
-        }}>
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              {/* Logo */}
-              <div className="flex items-center gap-3 group cursor-pointer">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 flex items-center justify-center transform group-hover:rotate-180 transition-transform duration-700">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                    CortexFile
-                  </h1>
-                  <p className="text-xs opacity-60">Premium Software Store</p>
-                </div>
-              </div>
 
-              {/* Search */}
-              <div className="hidden md:flex items-center gap-4 flex-1 max-w-xl mx-8">
-                <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 opacity-50" />
-                  <input
-                    type="text"
-                    placeholder="Search for software..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 rounded-2xl backdrop-blur-xl border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    style={{
-                      background: darkMode ? 'rgba(31, 41, 55, 0.6)' : 'rgba(255, 255, 255, 0.9)',
-                      borderColor: darkMode ? 'rgba(139, 92, 246, 0.3)' : 'rgba(139, 92, 246, 0.2)'
-                    }}
-                  />
-                </div>
-              </div>
+        {/* Restored Navbar */}
+        <Navbar
+          cartCount={cart.reduce((a, b) => a + b.quantity, 0)}
+          onOpenCart={() => setShowCart(true)}
+        />
 
-              {/* Actions */}
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className="p-3 rounded-xl backdrop-blur-xl transition-all duration-300 hover:scale-110"
-                  style={{
-                    background: darkMode ? 'rgba(31, 41, 55, 0.6)' : 'rgba(255, 255, 255, 0.9)',
-                    border: '1px solid rgba(139, 92, 246, 0.3)'
-                  }}
-                >
-                  {darkMode ? '🌙' : '☀️'}
-                </button>
-
-                <button
-                  onClick={() => setShowCart(!showCart)}
-                  className="relative p-3 rounded-xl backdrop-blur-xl transition-all duration-300 hover:scale-110"
-                  style={{
-                    background: darkMode ? 'rgba(31, 41, 55, 0.6)' : 'rgba(255, 255, 255, 0.9)',
-                    border: '1px solid rgba(139, 92, 246, 0.3)'
-                  }}
-                >
-                  <ShoppingCart className="w-6 h-6" />
-                  {cart.length > 0 && (
-                    <span className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-pink-500 to-purple-500 rounded-full flex items-center justify-center text-xs font-bold animate-pulse">
-                      {cart.length}
-                    </span>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </nav>
-
-        {/* Shopping Cart Sidebar */}
-        <div className={`fixed right-0 top-0 h-full w-96 z-50 backdrop-blur-2xl transform transition-transform duration-500 ${showCart ? 'translate-x-0' : 'translate-x-full'}`}
+        {/* Shopping Cart Sidebar (Custom implementation based on restored logic) */}
+        <div className={`fixed ${dir === 'rtl' ? 'left-0' : 'right-0'} top-0 h-full w-96 z-50 backdrop-blur-2xl transform transition-transform duration-500 ${showCart ? 'translate-x-0' : (dir === 'rtl' ? '-translate-x-full' : 'translate-x-full')}`}
           style={{
             background: darkMode ? 'rgba(17, 24, 39, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-            borderLeft: '1px solid rgba(139, 92, 246, 0.2)'
+            borderLeft: dir === 'rtl' ? 'none' : '1px solid rgba(139, 92, 246, 0.2)',
+            borderRight: dir === 'rtl' ? '1px solid rgba(139, 92, 246, 0.2)' : 'none'
           }}
         >
           <div className="p-6 h-full flex flex-col">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Shopping Cart</h2>
+              <h2 className="text-2xl font-bold">{t('cart.title')}</h2>
               <button onClick={() => setShowCart(false)} className="p-2 hover:bg-purple-500 hover:bg-opacity-20 rounded-lg transition-colors">
                 <X className="w-6 h-6" />
               </button>
@@ -401,7 +215,7 @@ const Store = () => {
               {cart.length === 0 ? (
                 <div className="text-center py-12 opacity-60">
                   <ShoppingCart className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                  <p>Your cart is empty</p>
+                  <p>{t('cart.empty')}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -413,16 +227,15 @@ const Store = () => {
                       }}
                     >
                       <div className="flex items-start gap-3">
-                        {/* Image Rendering Logic */}
-                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center flex-shrink-0">
                           {item.image.includes('http') ? (
                             <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                           ) : (
                             <span className="text-3xl">{item.image}</span>
                           )}
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold">{item.name}</h3>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold truncate">{item.name}</h3>
                           <p className="text-sm opacity-60">${item.price}</p>
                           <div className="flex items-center gap-2 mt-2">
                             <button
@@ -456,7 +269,7 @@ const Store = () => {
             {cart.length > 0 && (
               <div className="mt-6 space-y-4">
                 <div className="flex items-center justify-between text-xl font-bold">
-                  <span>Total:</span>
+                  <span>{t('cart.total')}:</span>
                   <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                     ${cartTotal.toFixed(2)}
                   </span>
@@ -465,7 +278,7 @@ const Store = () => {
                   onClick={() => { setCheckoutStep(1); setShowCart(false); }}
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 font-bold text-white hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
                 >
-                  Proceed to Checkout
+                  {t('cart.checkout')}
                 </button>
               </div>
             )}
@@ -485,14 +298,14 @@ const Store = () => {
 
                 <h1 className="text-6xl md:text-7xl font-bold leading-tight">
                   <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-gradient">
-                    Premium Software
+                    {t('hero.title').split(' ')[0]}
                   </span>
                   <br />
-                  <span className="text-white">For Creators</span>
+                  <span className="text-white">{t('hero.title').split(' ').slice(1).join(' ')}</span>
                 </h1>
 
                 <p className="text-xl opacity-80 leading-relaxed">
-                  Discover cutting-edge software tools powered by AI. Transform your workflow with next-generation applications built for 2026 and beyond.
+                  {t('hero.subtitle')}
                 </p>
 
                 <div className="flex flex-wrap gap-4">
@@ -500,10 +313,10 @@ const Store = () => {
                     onClick={() => document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' })}
                     className="px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 font-bold text-white hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
                   >
-                    Browse Products
+                    {t('hero.explore')}
                   </button>
                   <button className="px-8 py-4 rounded-2xl backdrop-blur-xl border border-purple-500/30 font-semibold hover:bg-purple-500/10 transition-all duration-300">
-                    Watch Demo
+                    {t('hero.demo')}
                   </button>
                 </div>
 
@@ -523,16 +336,25 @@ const Store = () => {
                 </div>
               </div>
 
+              {/* 3D Hero Element Fallback */}
               <div className="relative">
-                <canvas ref={heroCanvasRef} className="w-full h-96 rounded-3xl" />
+                {webGLAvailable ? (
+                  <div className="w-full h-96 rounded-3xl bg-purple-500/5 flex items-center justify-center">
+                    {/* Complex 3D scene would typically go here, simplified to a placeholder or simpler canvas if needed */}
+                    <div className="animate-float">
+                      <Zap size={200} className="text-purple-500/50" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full h-96 rounded-3xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 animate-pulse flex items-center justify-center">
+                    <Star size={120} className="text-white/20 animate-spin-slow" />
+                  </div>
+                )}
+                {/* Overlay Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent rounded-3xl pointer-events-none" />
               </div>
             </div>
           </div>
-
-          {/* Floating elements */}
-          <div className="absolute top-20 right-20 w-20 h-20 bg-purple-500 rounded-full blur-3xl opacity-20 animate-pulse" />
-          <div className="absolute bottom-20 left-20 w-32 h-32 bg-pink-500 rounded-full blur-3xl opacity-20 animate-pulse delay-1000" />
         </section>
 
         {/* Categories */}
@@ -569,10 +391,10 @@ const Store = () => {
             <div className="text-center mb-12">
               <h2 className="text-5xl font-bold mb-4">
                 <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                  Featured Products
+                  {t('store.digitalArsenal')}
                 </span>
               </h2>
-              <p className="text-xl opacity-60">Handpicked premium software for professionals</p>
+              <p className="text-xl opacity-60">{t('store.premiumTools')}</p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -582,7 +404,7 @@ const Store = () => {
                 </div>
               ) : filteredProducts.length === 0 ? (
                 <div className="col-span-full text-center py-20 opacity-50">
-                  <p className="text-xl">No products found matching your criteria.</p>
+                  <p className="text-xl">{t('common.searchPlaceholder')}</p>
                 </div>
               ) : (
                 filteredProducts.map((product, index) => (
@@ -648,7 +470,7 @@ const Store = () => {
                         }}
                         className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
                       >
-                        Add to Cart
+                        {t('cart.add')}
                       </button>
                     </div>
 
@@ -661,13 +483,50 @@ const Store = () => {
           </div>
         </section>
 
+        {/* Features / Why Choose Us */}
+        <section id="features" className="py-20 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-5xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                  Why Choose CortexFile?
+                </span>
+              </h2>
+            </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                { icon: Shield, title: t('hero.secureGuard'), desc: 'Military-grade encryption and verified software', color: 'from-blue-500 to-cyan-500' },
+                { icon: Zap, title: t('hero.instantDelivery'), desc: 'Download immediately after purchase', color: 'from-purple-500 to-pink-500' },
+                { icon: Monitor, title: t('features.cloudSync'), desc: 'Free updates and priority support forever', color: 'from-green-500 to-emerald-500' }
+              ].map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <div
+                    key={index}
+                    className="p-8 rounded-3xl backdrop-blur-xl border border-purple-500/20 hover:border-purple-500 transition-all duration-300 transform hover:scale-105"
+                    style={{
+                      background: darkMode ? 'rgba(31, 41, 55, 0.4)' : 'rgba(255, 255, 255, 0.6)'
+                    }}
+                  >
+                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4`}>
+                      <Icon className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2">{feature.title}</h3>
+                    <p className="opacity-60">{feature.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* Testimonials */}
-        <section className="py-20 px-6 relative overflow-hidden">
+        <section id="testimonials" className="py-20 px-6 relative overflow-hidden">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-5xl font-bold mb-4">
                 <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                  What Customers Say
+                  {t('testimonials.title')}
                 </span>
               </h2>
             </div>
@@ -715,73 +574,35 @@ const Store = () => {
           </div>
         </section>
 
-        {/* Pricing/Features */}
-        <section className="py-20 px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                  Why Choose CortexFile?
-                </span>
-              </h2>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                { icon: Shield, title: 'Secure & Safe', desc: 'Military-grade encryption and verified software', color: 'from-blue-500 to-cyan-500' },
-                { icon: Zap, title: 'Instant Delivery', desc: 'Download immediately after purchase', color: 'from-purple-500 to-pink-500' },
-                { icon: Lock, title: 'Lifetime Updates', desc: 'Free updates and priority support forever', color: 'from-green-500 to-emerald-500' }
-              ].map((feature, index) => {
-                const Icon = feature.icon;
-                return (
-                  <div
-                    key={index}
-                    className="p-8 rounded-3xl backdrop-blur-xl border border-purple-500/20 hover:border-purple-500 transition-all duration-300 transform hover:scale-105"
-                    style={{
-                      background: darkMode ? 'rgba(31, 41, 55, 0.4)' : 'rgba(255, 255, 255, 0.6)'
-                    }}
-                  >
-                    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4`}>
-                      <Icon className="w-8 h-8 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-2">{feature.title}</h3>
-                    <p className="opacity-60">{feature.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
         {/* FAQ */}
         <section className="py-20 px-6">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-5xl font-bold mb-4">
                 <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-                  Frequently Asked Questions
+                  {t('faq.title')}
                 </span>
               </h2>
             </div>
 
             <div className="space-y-4">
-              {faqs.map((faq, index) => (
+              {faqs.map((faqIndex) => (
                 <div
-                  key={index}
+                  key={faqIndex}
                   className="rounded-2xl backdrop-blur-xl border border-purple-500/20 overflow-hidden transition-all duration-300"
                   style={{
                     background: darkMode ? 'rgba(31, 41, 55, 0.4)' : 'rgba(255, 255, 255, 0.6)'
                   }}
                 >
                   <button
-                    onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                    onClick={() => setExpandedFaq(expandedFaq === faqIndex ? null : faqIndex)}
                     className="w-full p-6 flex items-center justify-between text-left hover:bg-purple-500/5 transition-colors"
                   >
-                    <span className="font-semibold text-lg">{faq.question}</span>
-                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${expandedFaq === index ? 'transform rotate-180' : ''}`} />
+                    <span className="font-semibold text-lg">{t(`faq.q${faqIndex}`)}</span>
+                    <ChevronDown className={`w-5 h-5 transition-transform duration-300 ${expandedFaq === faqIndex ? 'transform rotate-180' : ''}`} />
                   </button>
-                  <div className={`transition-all duration-300 overflow-hidden ${expandedFaq === index ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <p className="px-6 pb-6 opacity-60">{faq.answer}</p>
+                  <div className={`transition-all duration-300 overflow-hidden ${expandedFaq === faqIndex ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <p className="px-6 pb-6 opacity-60 text-sm md:text-base">{t(`faq.a${faqIndex}`)}</p>
                   </div>
                 </div>
               ))}
@@ -794,13 +615,13 @@ const Store = () => {
           <div className="max-w-4xl mx-auto">
             <div className="p-12 rounded-3xl bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 text-white text-center relative overflow-hidden">
               <div className="relative z-10">
-                <h2 className="text-4xl font-bold mb-4">Stay Updated</h2>
-                <p className="text-xl mb-8 opacity-90">Get exclusive deals and new releases delivered to your inbox</p>
+                <h2 className="text-4xl font-bold mb-4">{t('newsletter.title')}</h2>
+                <p className="text-xl mb-8 opacity-90">{t('newsletter.desc')}</p>
 
                 {newsletterSuccess ? (
                   <div className="inline-flex items-center gap-2 px-6 py-3 bg-white text-purple-600 rounded-2xl font-semibold animate-bounce">
                     <Check className="w-5 h-5" />
-                    Successfully subscribed!
+                    Success!
                   </div>
                 ) : (
                   <form onSubmit={handleNewsletterSubmit} className="flex gap-4 max-w-md mx-auto">
@@ -808,7 +629,7 @@ const Store = () => {
                       type="email"
                       value={newsletterEmail}
                       onChange={(e) => setNewsletterEmail(e.target.value)}
-                      placeholder="Enter your email"
+                      placeholder={t('newsletter.placeholder')}
                       required
                       className="flex-1 px-6 py-4 rounded-2xl bg-white/20 backdrop-blur-xl border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/50"
                     />
@@ -816,7 +637,7 @@ const Store = () => {
                       type="submit"
                       className="px-8 py-4 rounded-2xl bg-white text-purple-600 font-bold hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
                     >
-                      Subscribe
+                      {t('newsletter.subscribe')}
                     </button>
                   </form>
                 )}
@@ -840,11 +661,11 @@ const Store = () => {
                   </div>
                   <span className="text-xl font-bold">CortexFile</span>
                 </div>
-                <p className="opacity-60 text-sm">Premium software marketplace for professionals and creators worldwide.</p>
+                <p className="opacity-60 text-sm">{t('footer.desc')}</p>
               </div>
 
               <div>
-                <h4 className="font-bold mb-4">Products</h4>
+                <h4 className="font-bold mb-4">{t('nav.products')}</h4>
                 <ul className="space-y-2 text-sm opacity-60">
                   <li><a href="#" className="hover:text-purple-400 transition-colors">Gaming Tools</a></li>
                   <li><a href="#" className="hover:text-purple-400 transition-colors">Development</a></li>
@@ -854,17 +675,17 @@ const Store = () => {
               </div>
 
               <div>
-                <h4 className="font-bold mb-4">Support</h4>
+                <h4 className="font-bold mb-4">{t('footer.support')}</h4>
                 <ul className="space-y-2 text-sm opacity-60">
                   <li><a href="#" className="hover:text-purple-400 transition-colors">Help Center</a></li>
-                  <li><a href="#" className="hover:text-purple-400 transition-colors">Contact Us</a></li>
+                  <li><a href="#" className="hover:text-purple-400 transition-colors">{t('footer.contactUs')}</a></li>
                   <li><a href="#" className="hover:text-purple-400 transition-colors">Refund Policy</a></li>
                   <li><a href="#" className="hover:text-purple-400 transition-colors">License Terms</a></li>
                 </ul>
               </div>
 
               <div>
-                <h4 className="font-bold mb-4">Payment Methods</h4>
+                <h4 className="font-bold mb-4">{t('footer.paymentMethods')}</h4>
                 <div className="flex flex-wrap gap-2 mb-4">
                   <div className="px-3 py-2 rounded-lg bg-purple-500/20 text-xs font-semibold flex items-center gap-1">
                     <CreditCard className="w-4 h-4" />
@@ -890,7 +711,7 @@ const Store = () => {
             </div>
 
             <div className="pt-8 border-t border-purple-500/20 flex flex-col md:flex-row items-center justify-between gap-4">
-              <p className="text-sm opacity-60">© 2026 CortexFile. All rights reserved.</p>
+              <p className="text-sm opacity-60">{t('footer.copyright')}</p>
               <div className="flex items-center gap-4 text-sm opacity-60">
                 <a href="#" className="hover:text-purple-400 transition-colors">Privacy Policy</a>
                 <span>•</span>
@@ -903,7 +724,7 @@ const Store = () => {
         </footer>
 
         {/* Floating Chat Button */}
-        <button className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-2xl shadow-purple-500/50 hover:scale-110 transition-transform duration-300 z-40 animate-bounce">
+        <button className={`fixed bottom-8 ${dir === 'rtl' ? 'left-8' : 'right-8'} w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center shadow-2xl shadow-purple-500/50 hover:scale-110 transition-transform duration-300 z-40 animate-bounce`}>
           <MessageCircle className="w-8 h-8 text-white" />
         </button>
 
@@ -934,7 +755,7 @@ const Store = () => {
               <p className="text-lg opacity-80 mb-6">{selectedProduct.description}</p>
 
               <div className="mb-6">
-                <h3 className="font-bold mb-3">Key Features:</h3>
+                <h3 className="font-bold mb-3">{t('nav.features')}:</h3>
                 <ul className="space-y-2">
                   {selectedProduct.features.map((feature, index) => (
                     <li key={index} className="flex items-center gap-2">
@@ -956,7 +777,7 @@ const Store = () => {
                   }}
                   className="px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
                 >
-                  Add to Cart
+                  {t('cart.add')}
                 </button>
               </div>
             </div>
@@ -1001,6 +822,22 @@ const Store = () => {
 
         .animate-float {
           animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+            animation-delay: 4s;
         }
       `}</style>
     </div>
