@@ -112,7 +112,7 @@ export const translations = {
             q1: 'How do I receive my software after purchase?',
             a1: 'After payment, you will instantly receive an email with your download link and license key. You can also access them in your account dashboard.',
             q2: 'What payment methods do you accept?',
-            a2: 'We accept all major credit cards (Visa, Mastercard, Amex) and major cryptocurrencies (BTC, ETH, LTC) via our secure payment gateway.',
+            a2: 'We accept all major credit cards (Visa, Mastercard, Amex) and PayPal via our secure payment gateway.',
             q3: 'Is there a refund policy?',
             a3: 'Yes, we offer a 14-day money-back guarantee if the software does not work as described or if you encounter technical issues we cannot resolve.',
             q4: 'Can I use the software on multiple devices?',

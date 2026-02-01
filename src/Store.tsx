@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Search, Star, Download, Shield, Lock, Zap, Code, Gamepad2, Wrench, Sparkles, ChevronDown, Check, X, Menu, CreditCard, Bitcoin, MessageCircle, Play, Eye, Heart, TrendingUp, Cpu, Monitor, Globe } from 'lucide-react';
+import { ShoppingCart, Search, Star, Download, Shield, Lock, Zap, Code, Gamepad2, Wrench, Sparkles, ChevronDown, Check, X, Menu, CreditCard, MessageCircle, Play, Eye, Heart, TrendingUp, Cpu, Monitor, Globe } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import { Product } from '../types';
 import Navbar from './components/Navbar'; // Restored Navbar
@@ -694,11 +694,7 @@ const Store = () => {
                 <div className="flex flex-wrap gap-2 mb-4">
                   <div className="px-3 py-2 rounded-lg bg-purple-500/20 text-xs font-semibold flex items-center gap-1">
                     <CreditCard className="w-4 h-4" />
-                    Cards
-                  </div>
-                  <div className="px-3 py-2 rounded-lg bg-purple-500/20 text-xs font-semibold flex items-center gap-1">
-                    <Bitcoin className="w-4 h-4" />
-                    Crypto
+                    Visa / Mastercard
                   </div>
                 </div>
                 <div className="flex gap-3">
