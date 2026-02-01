@@ -11,7 +11,7 @@ import Navbar from './components/Navbar';
 import SectionTitle from './components/SectionTitle';
 
 // NOTE: This is a test public key. Replace with your own.
-const stripePromise = loadStripe('pk_test_TYooMQauvdEDq54NiTphI7jx');
+const stripePromise = loadStripe('pk_test_51SvoU7RpEWN0XJYdulUvEqpHNFKzeMjeg3yG4mtqu4GGbv5ZzRtqAZA102kYkwG2JFLRAy8aPwxQK8jrRMK36Yms00cKvzhsN3');
 
 const CheckoutForm = ({ total }: { total: number }) => {
     const stripe = useStripe();
